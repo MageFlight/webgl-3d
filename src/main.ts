@@ -1,4 +1,4 @@
-import { Matrix4 } from "./math";
+import { Matrix4, Vector3 } from "./math";
 
 const vertexShaderSrc = `#version 300 es
 
@@ -116,7 +116,13 @@ function drawScene(gl: WebGL2RenderingContext, program: WebGLProgram) {
   const cameraX = Math.cos(cameraAngle) * radius * 1.75;
   const cameraZ = Math.sin(cameraAngle) * radius * 1.75;
   let cameraMatrix = Matrix4.zRotation(30 * Math.PI / 180);
-  cameraMatrix = Matrix4.multiply(cameraMatrix, Matrix4.lookAt([cameraX, 50, cameraZ], [0, 0, 0], [0, 1, 0]));
+  cameraMatrix = Matrix4.multiply(
+    cameraMatrix,
+    Matrix4.lookAt(
+      new Vector3([cameraX, 0, cameraZ]),
+      new Vector3([0, 0, 0]),
+      new Vector3([0, 1, 0])
+  ));
 
   const viewMatrix = Matrix4.inverse(cameraMatrix);
   const viewProjectionMatrix = Matrix4.multiply(projectionMatrix, viewMatrix);
@@ -132,7 +138,7 @@ function drawScene(gl: WebGL2RenderingContext, program: WebGLProgram) {
 
     const matrix = Matrix4.multiply(viewProjectionMatrix, worldMatrix);
 
-    gl.uniformMatrix4fv(matrixLocation, false, matrix);
+    gl.uniformMatrix4fv(matrixLocation, false, matrix.toArray());
 
     gl.drawArrays(gl.TRIANGLES, 0, 16 * 6);
   }
@@ -282,10 +288,10 @@ function setGeometry(gl: WebGL2RenderingContext) {
   matrix = Matrix4.translate(matrix, -50, -75, -15);
 
   for (var i = 0; i < positions.length; i += 3) {
-    var vector = Matrix4.transformVector(matrix, [positions[i + 0], positions[i + 1], positions[i + 2], 1]);
-    positions[i + 0] = vector[0];
-    positions[i + 1] = vector[1];
-    positions[i + 2] = vector[2];
+    var vector = Matrix4.transformVector(matrix, new Vector3([positions[i + 0], positions[i + 1], positions[i + 2]]));
+    positions[i + 0] = vector.x;
+    positions[i + 1] = vector.y;
+    positions[i + 2] = vector.z;
   }
 
   gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
