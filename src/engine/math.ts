@@ -585,3 +585,8 @@ export class Vector3 {
         }
     }
 }
+
+let currentID = 0;
+export function generateID(): number {
+    return currentID++;
+}
