@@ -92,8 +92,8 @@ export class Renderer {
 }
 
 export class Renderable extends GameObject {
-    public bufferData = Map<string, attribInfo>;
-    public uniformData = Map<string, uniformInfo>;
+    public bufferData: Map<string, attribInfo> = new Map();
+    public uniformData: Map<string, uniformInfo> = new Map();
 
 
     constructor(name?: string);
