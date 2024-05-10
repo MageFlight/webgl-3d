@@ -1,6 +1,6 @@
-import { generateID } from "../math";
+import { Matrix4, Vector3, generateID } from "../math";
 
-export abstract class GameObject {
+export class GameObject {
     public readonly name: string;
     public readonly id: number;
     private _parent: GameObject | null = null;
@@ -16,8 +16,8 @@ export abstract class GameObject {
         }
     }
 
-    public abstract update(dt: number): void;
-    public abstract load(): Promise<void>;
+    public update(dt: number): void {}
+    public async load(): Promise<void> {}
 
     public get parent(): GameObject | null {
         return this._parent;
@@ -36,4 +36,11 @@ export abstract class GameObject {
     public get children(): GameObject[] {
         return [...this._children];
     }
+}
+
+export class Node3 extends GameObject {
+    public transform: Matrix4 = Matrix4.identity();
+
+    public update(dt: number): void {}
+    public async load(): Promise<void> {}  
 }

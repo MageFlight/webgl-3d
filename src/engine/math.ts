@@ -544,6 +544,15 @@ export class Matrix4 {
             cameraPos.x, cameraPos.y, cameraPos.z, 1
         ]);
     }
+
+    public static identity() {
+        return new Matrix4([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ]);
+    }
 }
 
 export class Vector3 {
@@ -583,6 +592,10 @@ export class Vector3 {
         } else {
             return new Vector3([0, 0, 0]);
         }
+    }
+
+    public static zero(): Vector3 {
+        return new Vector3([0, 0, 0]);
     }
 }
 
