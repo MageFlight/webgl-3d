@@ -1,17 +1,21 @@
 import { Engine } from "../engine/engine";
 import { GameObject } from "../engine/objects/gameObject";
+import { Renderer } from "../engine/renderer";
 import { View } from "../engine/view";
 import { TestObject } from "./testObject";
 
 export class GameView extends View {
     private _objects: GameObject[] = [];
     private _engine: Engine;
+    private _renderer: Renderer;
 
-    constructor(engine: Engine) {
+    constructor(engine: Engine, canvas: HTMLCanvasElement) {
         super();
 
         this._engine = engine;
         this._objects.push(new TestObject());
+
+        this._renderer = new Renderer(canvas);
     }
 
     public async init(): Promise<void> {

@@ -1,4 +1,5 @@
-import { GameObject } from "./objects/gameObject";
+import { Matrix4 } from "./math";
+import { GameObject, Node3 } from "./objects/gameObject";
 
 export class Renderer {
     private vertexShaderSrc = `#version 300 es
@@ -8,10 +9,11 @@ export class Renderer {
     
     out vec4 v_color;
 
-    uniform mat4 matrix;
+    uniform mat4 viewProjection;
+    uniform mat4 worldMatrix;
     
     void main() {
-        gl_Position = matrix * inPosition;
+        gl_Position = viewProjection * worldMatrix * inPosition;
 
         v_color = inColor;
     }`;
@@ -32,6 +34,10 @@ export class Renderer {
 
     private _program: WebGLProgram;
 
+    public static activeCamera: Camera | null;
+
+    private vaoCache: Map<BufferData, WebGLVertexArrayObject> = new Map();
+
     constructor(canvas: HTMLCanvasElement) {
         this._canvas = canvas;
         const context = canvas.getContext('webgl2');
@@ -40,10 +46,118 @@ export class Renderer {
         this._gl = context;
 
         this._program = this.createProgram();
+        this._gl.useProgram(this._program);
     }
 
     public drawTree(tree: GameObject[]) {
-    
+        this.reszieCanvas();
+        this._gl.viewport(0, 0, this._canvas.width, this._canvas.height);
+        this._gl.clearColor(0, 0, 0, 0);
+        this._gl.clear(this._gl.COLOR_BUFFER_BIT | this._gl.DEPTH_BUFFER_BIT);
+
+        this._gl.enable(this._gl.DEPTH_TEST);
+        this._gl.enable(this._gl.CULL_FACE);
+
+        let viewMatrix = Matrix4.identity();
+
+        if (Renderer.activeCamera) {
+            viewMatrix = Matrix4.inverse(Renderer.activeCamera.transform);
+        }
+
+        const aspect = this._canvas.clientWidth / this._canvas.clientHeight;
+        const projection = Matrix4.perspective(70 * Math.PI / 180, aspect, 1, 2000);
+
+        const viewProjection = Matrix4.multiply(projection, viewMatrix);
+
+        const viewProjectionLocation = this._gl.getUniformLocation(this._program, "viewProjection");
+        this._gl.uniformMatrix4fv(viewProjectionLocation, false, viewProjection.toArray());
+
+        for (let i = 0; i < tree.length; i++) {
+            this.drawObject(tree[i], Matrix4.identity());
+        }
+    }
+
+    private drawObject(object: GameObject, parentTransform: Matrix4) {
+        let transform = parentTransform;
+        if (object instanceof Node3) {
+            transform = Matrix4.multiply(parentTransform, transform);
+        }
+
+        if (object instanceof Renderable) {
+            const matrixLocation = this._gl.getUniformLocation(this._program, "worldMatrix");
+            this._gl.uniformMatrix4fv(matrixLocation, false, transform.toArray());
+
+            this.setUniforms(object.uniformData);
+
+            this._gl.bindVertexArray(this.getVAO(object.bufferData));
+
+            // TODO: Fix checking length
+            this._gl.drawArrays(this._gl.TRIANGLES, 0, object.bufferData.get("inPosition")!.data.length);
+        }
+    }
+
+    private getVAO(data: BufferData): WebGLVertexArrayObject {
+        // TODO: Not having a way to remove unused buffer data info from the map might cause performance issues
+        //       or excess memory usage.
+
+        let vao: WebGLVertexArrayObject | undefined | null = this.vaoCache.get(data);
+        if (vao) return vao;
+
+        vao = this._gl.createVertexArray();
+        if (vao === null) throw new Error("Could not create VAO");
+        this._gl.bindVertexArray(vao);
+
+        for (const attrib of data) {
+            const location = this._gl.getAttribLocation(this._program, attrib[0]);
+            
+            const buffer = this._gl.createBuffer();
+            this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
+            this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(attrib[1].data), this._gl.STATIC_DRAW);
+            
+            this._gl.enableVertexAttribArray(location);
+            this._gl.vertexAttribPointer(location, attrib[1].numComponents, this._gl.FLOAT, false, 0, 0);
+        }
+
+        this._gl.bindVertexArray(null);
+
+        this.vaoCache.set(data, vao);
+        return vao;
+    }
+
+    private setUniforms(uniforms: Map<string, UniformInfo>) {
+        for (const uniform of uniforms) {
+            const location = this._gl.getUniformLocation(this._program, uniform[0]);
+            const info = uniform[1];
+            if (info.isMatrix) {
+                switch (info.dimension) {
+                    case 2:
+                        this._gl.uniformMatrix2fv(location, false, info.data);
+                        break;
+                    case 3:
+                        this._gl.uniformMatrix3fv(location, false, info.data);
+                        break;
+                    case 4:
+                        this._gl.uniformMatrix4fv(location, false, info.data);
+                        break;
+                }
+            } else {
+                switch (info.dimension) {
+                    case 1:
+                        this._gl.uniform1fv(location, info.data);
+                        break;
+                    case 2:
+                        this._gl.uniform2fv(location, info.data);
+                        break;
+                    case 3:
+                        this._gl.uniform3fv(location, info.data);
+                        break;
+                    case 4:
+                        this._gl.uniform4fv(location, info.data);
+                        break;
+                                
+                }
+            }
+        }
     }
 
     private createProgram() {
@@ -92,13 +206,13 @@ export class Renderer {
 }
 
 export class Renderable extends GameObject {
-    public bufferData: Map<string, attribInfo> = new Map();
-    public uniformData: Map<string, uniformInfo> = new Map();
+    public bufferData: BufferData = new Map();
+    public uniformData: Map<string, UniformInfo> = new Map();
 
 
     constructor(name?: string);
-    constructor(bufferData: Map<string, attribInfo>, uniformData: Map<string, uniformInfo>, name?:string);
-    constructor(a?: Map<string, attribInfo> | string, uniformData?: Map<string, uniformInfo>, name?:string) {
+    constructor(bufferData: BufferData, uniformData: Map<string, UniformInfo>, name?:string);
+    constructor(a?: BufferData | string, uniformData?: Map<string, UniformInfo>, name?:string) {
         super(typeof a === "string" ? a : name);
 
         if (a && typeof a !== "string") {
@@ -113,5 +227,14 @@ export class Renderable extends GameObject {
     public async load(): Promise<void> {}
 }
 
-export type attribInfo = { numComponents: number, data: number[] };
-export type uniformInfo = { dimension: number, isMatrix: boolean, data: number[] };
+export class Camera extends Node3 {
+    constructor(name?: string) {
+        super(name);
+
+        Renderer.activeCamera = this;
+    }
+}
+
+export type BufferData = Map<string, AttribInfo>;
+export type AttribInfo = { numComponents: number, data: number[] };
+export type UniformInfo = { dimension: number, isMatrix: boolean, data: number[] };
