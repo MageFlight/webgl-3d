@@ -560,12 +560,24 @@ export class Vector3 {
     public y = 0;
     public z = 0;
 
-    constructor(data?: number[]) {
-        if (!data) return;
+    constructor();
+    constructor(data: number[]);
+    constructor(x: number, y: number, z: number);
+    constructor(a?: number[] | number, b?: number, c?: number) {
+        if (a === undefined) return;
 
-        this.x = data[0];
-        this.y = data[1];
-        this.z = data[2];
+        if (Array.isArray(a)) {
+            this.x = a[0];
+            this.y = a[1];
+            this.z = a[2];
+            return;
+        }
+
+        if (b === undefined || c === undefined) return;
+
+        this.x = a;
+        this.y = b;
+        this.z = c;
     }
 
     /**
