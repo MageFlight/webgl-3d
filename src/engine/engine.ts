@@ -1,3 +1,4 @@
+import { KeyboardHandler } from "./input";
 import { View } from "./view";
 
 export class Engine {
@@ -5,6 +6,8 @@ export class Engine {
     private _currentView: View | null = null;
     private _previousTime: number = -1;
     private _numPromises = 0;
+
+    private _keyboardHandler = KeyboardHandler.instance;
 
     constructor(view?: View) {
         if (!view) return;
@@ -44,6 +47,8 @@ export class Engine {
                 this._currentView = this._nextView;
                 this._nextView = null;
             }
+
+            this._keyboardHandler.update();
 
             if (!this._currentView || this._numPromises > 0) return;
 

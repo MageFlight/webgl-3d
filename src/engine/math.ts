@@ -592,6 +592,10 @@ export class Vector3 {
           a.x * b.y - a.y * b.x]);
     }
 
+    public static add(a: Vector3, b: Vector3): Vector3 {
+        return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
+    }
+
     public static subtract(a: Vector3, b: Vector3): Vector3 {
         return new Vector3([a.x - b.x, a.y - b.y, a.z - b.z]);
     }
