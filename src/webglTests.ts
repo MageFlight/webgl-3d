@@ -1,4 +1,4 @@
-import { Matrix4, Vector3 } from "./engine/math";
+import { Matrix4 } from "./engine/math/matrix";
 
 const vertexShaderSrc = `#version 300 es
 

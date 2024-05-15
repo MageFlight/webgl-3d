@@ -1,10 +1,10 @@
-import { Matrix4 } from "../engine/math";
 import { AttribInfo, BufferData, Renderable } from "../engine/renderer";
 
 export class TestObject extends Renderable {
     constructor() {
         super();
         
+        // this.transform = this.transform.rotated(new Vector3(1, 0, 0), Math.PI / 4);
         this.bufferData = new Map<string, AttribInfo>([
             [
                 "inPosition",

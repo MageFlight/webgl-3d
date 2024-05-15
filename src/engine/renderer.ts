@@ -1,4 +1,4 @@
-import { Matrix4 } from "./math";
+import { Matrix4 } from "./math/matrix";
 import { GameObject, Node3 } from "./objects/gameObject";
 
 export class Renderer {
@@ -61,13 +61,13 @@ export class Renderer {
         let viewMatrix = Matrix4.identity();
 
         if (Renderer.activeCamera) {
-            viewMatrix = Matrix4.inverse(Renderer.activeCamera.transform);
+            viewMatrix = Renderer.activeCamera.transform.inverse();
         }
 
         const aspect = this._canvas.clientWidth / this._canvas.clientHeight;
         const projection = Matrix4.perspective(70 * Math.PI / 180, aspect, 1, 2000);
 
-        const viewProjection = Matrix4.multiply(projection, viewMatrix);
+        const viewProjection = projection.multiply(viewMatrix);
 
         const viewProjectionLocation = this._gl.getUniformLocation(this._program, "viewProjection");
         this._gl.uniformMatrix4fv(viewProjectionLocation, false, viewProjection.toArray());
@@ -80,7 +80,7 @@ export class Renderer {
     private drawObject(object: GameObject, parentTransform: Matrix4) {
         let transform = parentTransform;
         if (object instanceof Node3) {
-            transform = Matrix4.multiply(parentTransform, object.transform);
+            transform = parentTransform.multiply(object.transform);
         }
 
         if (object instanceof Renderable) {

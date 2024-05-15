@@ -1,4 +1,4 @@
-import { Matrix4, Vector3, generateID } from "../math";
+import { Matrix4, generateID } from "../math/matrix";
 
 export class GameObject {
     public readonly name: string;

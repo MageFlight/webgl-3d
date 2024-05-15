@@ -1,3 +1,5 @@
+import { Vector2, Vector3 } from "./vector";
+
 export class Matrix3 {
     public a0 = 0;
     public a1 = 0;
@@ -25,29 +27,28 @@ export class Matrix3 {
 
     /**
      * Multiplies two 3x3 matricies together
-     * @param m1 The first matrix to multiply
-     * @param m2 The second matrix to multiply
+     * @param right The matrix on the right of the equation
      * @returns The product of the two matricies
      */
-    public static multiply(m1: Matrix3, m2: Matrix3): Matrix3 {
-        let a00 = m1.a0;
-        let a01 = m1.a1;
-        let a02 = m1.a2;
-        let a10 = m1.b0;
-        let a11 = m1.b1;
-        let a12 = m1.b2;
-        let a20 = m1.c0;
-        let a21 = m1.c1;
-        let a22 = m1.c2;
-        let b00 = m2.a0;
-        let b01 = m2.a1;
-        let b02 = m2.a2;
-        let b10 = m2.b0;
-        let b11 = m2.b1;
-        let b12 = m2.b2;
-        let b20 = m2.c0;
-        let b21 = m2.c1;
-        let b22 = m2.c2;
+    public multiply(right: Matrix3): Matrix3 {
+        let a00 = this.a0;
+        let a01 = this.a1;
+        let a02 = this.a2;
+        let a10 = this.b0;
+        let a11 = this.b1;
+        let a12 = this.b2;
+        let a20 = this.c0;
+        let a21 = this.c1;
+        let a22 = this.c2;
+        let b00 = right.a0;
+        let b01 = right.a1;
+        let b02 = right.a2;
+        let b10 = right.b0;
+        let b11 = right.b1;
+        let b12 = right.b2;
+        let b20 = right.c0;
+        let b21 = right.c1;
+        let b22 = right.c2;
     
         return new Matrix3([
             b00 * a00 + b01 * a10 + b02 * a20,
@@ -63,28 +64,25 @@ export class Matrix3 {
     }
 
     /**
-     * Creates a matrix that transforms vectors by translating them by tx and ty
-     * @param tx The amount to translate on the x-axis
-     * @param ty The amount to translate on the y-axis
+     * Creates a matrix that transforms vectors by translating them by a vector
+     * @param vector The amount to translate on the y-axis
      * @returns The translation matrix
      */
-    public static translation(tx: number, ty: number): Matrix3 {
+    public static translation(vector: Vector2): Matrix3 {
         return new Matrix3([
             1, 0, 0,
             0, 1, 0,
-            tx, ty, 1
+            vector.x, vector.y, 1
         ]);
     }
 
     /**
-     * Translates a given matrix by tx and ty
-     * @param m The initial matrix to multiply the translation matrix by
-     * @param tx The amount to translate on the x-axis
-     * @param ty The amount to translate on the y-axis
+     * Translates a given matrix by a vector
+     * @param vector The amount to translate on the y-axis
      * @returns The translation matrix multiplied by the initial matrix
      */
-    public static translate(m: Matrix3, tx: number, ty: number): Matrix3 {
-        return Matrix3.multiply(m, Matrix3.translation(tx, ty));
+    public translated(vector: Vector2): Matrix3 {
+        return this.multiply(Matrix3.translation(vector));
     }
 
     /**
@@ -103,38 +101,34 @@ export class Matrix3 {
     }
 
     /**
-     * Rotates a matrix by the specified angle
-     * @param m The initial matrix
-     * @param radians The angle to rotate the matrix by
-     * @returns The rotation matrix multipled by the initial matrix
+     * Rotates this matrix by the specified angle
+     * @param radians The angle to rotate by
+     * @returns The rotation matrix multipled by this matrix
      */
-    public static rotate(m: Matrix3, radians: number): Matrix3 {
-        return Matrix3.multiply(m, Matrix3.rotation(radians));
+    public rotated(radians: number): Matrix3 {
+        return this.multiply(Matrix3.rotation(radians));
     }
 
     /**
      * Creates a scaling matrix
-     * @param sx The amount to scale the x-axis
-     * @param sy The amount to scale the y-axis
+     * @param vector The amount to scale each axis
      * @returns The scaling matrix
      */
-    public static scaling(sx: number, sy: number): Matrix3 {
+    public static scaling(vector: Vector2): Matrix3 {
         return new Matrix3([
-            sx, 0, 0,
-            0, sy, 0,
+            vector.x, 0, 0,
+            0, vector.y, 0,
             0, 0, 1
         ]);
     }
 
     /**
-     * Scales a given matrix
-     * @param m The initial matrix
-     * @param sx The amount to scale the x-axis by
-     * @param sy The amount to scale the y-axis by
+     * Scales this matrix
+     * @param vector The amount to scale each axis
      * @returns The scaling matrix multiplied by the initial matrix
      */
-    public static scale(m: Matrix3, sx: number, sy: number): Matrix3 {
-        return Matrix3.multiply(m, Matrix3.scaling(sx, sy));
+    public scaled(vector: Vector2): Matrix3 {
+        return this.multiply(Matrix3.scaling(vector));
     }
 
     /**
@@ -214,44 +208,43 @@ export class Matrix4 {
 
     /**
      * Multiples matrix b by matrix a
-     * @param a The matrix to multiply by
-     * @param b The matrix to multiply by
+     * @param right The matrix on te right of the equation
      * @returns The b matrix multiplied by the a matrix
      */
-    public static multiply(m1: Matrix4, m2: Matrix4): Matrix4 {
-        let a00 = m1.a0;
-        let a01 = m1.a1;
-        let a02 = m1.a2;
-        let a03 = m1.a3;
-        let a10 = m1.b0;
-        let a11 = m1.b1;
-        let a12 = m1.b2;
-        let a13 = m1.b3;
-        let a20 = m1.c0;
-        let a21 = m1.c1;
-        let a22 = m1.c2;
-        let a23 = m1.c3;
-        let a30 = m1.d0;
-        let a31 = m1.d1;
-        let a32 = m1.d2;
-        let a33 = m1.d3;
+    public multiply(right: Matrix4): Matrix4 {
+        let a00 = this.a0;
+        let a01 = this.a1;
+        let a02 = this.a2;
+        let a03 = this.a3;
+        let a10 = this.b0;
+        let a11 = this.b1;
+        let a12 = this.b2;
+        let a13 = this.b3;
+        let a20 = this.c0;
+        let a21 = this.c1;
+        let a22 = this.c2;
+        let a23 = this.c3;
+        let a30 = this.d0;
+        let a31 = this.d1;
+        let a32 = this.d2;
+        let a33 = this.d3;
 
-        let b00 = m2.a0;
-        let b01 = m2.a1;
-        let b02 = m2.a2;
-        let b03 = m2.a3;
-        let b10 = m2.b0;
-        let b11 = m2.b1;
-        let b12 = m2.b2;
-        let b13 = m2.b3;
-        let b20 = m2.c0;
-        let b21 = m2.c1;
-        let b22 = m2.c2;
-        let b23 = m2.c3;
-        let b30 = m2.d0;
-        let b31 = m2.d1;
-        let b32 = m2.d2;
-        let b33 = m2.d3;
+        let b00 = right.a0;
+        let b01 = right.a1;
+        let b02 = right.a2;
+        let b03 = right.a3;
+        let b10 = right.b0;
+        let b11 = right.b1;
+        let b12 = right.b2;
+        let b13 = right.b3;
+        let b20 = right.c0;
+        let b21 = right.c1;
+        let b22 = right.c2;
+        let b23 = right.c3;
+        let b30 = right.d0;
+        let b31 = right.d1;
+        let b32 = right.d2;
+        let b33 = right.d3;
 
         return new Matrix4([
             b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
@@ -275,138 +268,82 @@ export class Matrix4 {
     
     /**
      * Creates a new translation matrix
-     * @param tx The amount to translate the x-axis by
-     * @param ty The amount to translate the y-axis by
-     * @param tz The amount to translate the z-axis by
+     * @param vector The amount to translate by
      * @returns The translation matrix
      */
-    public static translation(tx: number, ty: number, tz: number): Matrix4 {
+    public static translation(vector: Vector3): Matrix4 {
         return new Matrix4([
             1, 0, 0, 0,
             0, 1, 0, 0,
             0, 0, 1, 0,
-            tx, ty, tz, 1,
+            vector.x, vector.y, vector.z, 1,
         ]);
     }
 
     /**
      * Translates a matrix
-     * @param m The initial matrix
-     * @param tx The amount to translate along the x-axis
-     * @param ty The amount to translate along the y-axis
-     * @param tz The amount to translate along the z-axis
+     * @param vector The amount to translate the matrix
      * @returns The translate matrix multiplied by the 
      */
-    public static translate(m: Matrix4, tx: number, ty: number, tz: number): Matrix4 {
-        return Matrix4.multiply(m, Matrix4.translation(tx, ty, tz));
+    public translated(vector: Vector3): Matrix4 {
+        return this.multiply(Matrix4.translation(vector));
     }
 
     /**
-     * Creates a matrix that rotates around the x-axis
-     * @param radians The angle to rotate
-     * @returns The x axis rotation matrix
+     * Creates a matrix that rotates around an axis.
+     * https://en.wikipedia.org/wiki/Rotation_matrix#Rotation_matrix_from_axis_and_angle
+     * @param axis The axis to rotate around
+     * @param angle The angle to rotate by
      */
-    public static xRotation(radians: number): Matrix4 {
-        let c = Math.cos(radians);
-        let s = Math.sin(radians);
+    public static rotation(axis: Vector3, angle: number): Matrix4 {
+        const c = Math.cos(angle);
+        const s = Math.sin(angle);
+
+        return new Matrix4([
+            axis.x * axis.x + (1 - axis.x * axis.x) * c,  axis.x * axis.y * (1 - c) - axis.z * s,       axis.x * axis.z * (1 - c) + axis.y * s,       0,
+            axis.y * axis.x * (1 - c) + axis.z * s,       axis.y * axis.y + (1 - axis.y * axis.y) * c,  axis.y * axis.z * (1 - c) - axis.x * s,       0,
+            axis.z * axis.x * (1 - c) - axis.y * s,       axis.z * axis.y * (1 - c) + axis.x * s,       axis.z * axis.z + (1 - axis.z * axis.z) * c,  0,
+            0, 0, 0, 1
+        ]);
+    }
+
+    public rotated(axis: Vector3, angle: number): Matrix4 {
+        return this.multiply(Matrix4.rotation(axis, angle));
+    }
+
+    public static xRotation(angle: number) {
+        const c = Math.cos(angle);
+        const s = Math.sin(angle);
+
         return new Matrix4([
             1, 0, 0, 0,
-            0, c, s, 0,
-            0, -s, c, 0,
+            0, c, -s, 0,
+            0, s, c, 0,
             0, 0, 0, 1
         ]);
     }
 
     /**
-     * Rotates a matrix along the x axis by a given angle 
-     * @param m The initial matrix
-     * @param radians The angle to rotate the matrix by
-     * @returns The rotated matrix
-     */
-    public static rotateX(m: Matrix4, radians: number): Matrix4 {
-        return Matrix4.multiply(m, Matrix4.xRotation(radians));
-    }
-
-    /**
-     * Creates a matrix that rotates around the y-axis
-     * @param radians The angle to rotate
-     * @returns The y axis rotation matrix
-     */
-    public static yRotation(radians: number): Matrix4 {
-        let c = Math.cos(radians);
-        let s = Math.sin(radians);
-
-        return new Matrix4([
-            c, 0, -s, 0,
-            0, 1, 0, 0,
-            s, 0, c, 0,
-            0, 0, 0, 1,
-        ]);
-    }
-
-    /**
-     * Rotates a matrix along the y axis by a given angle 
-     * @param m The initial matrix
-     * @param radians The angle to rotate the matrix by
-     * @returns The rotated matrix
-     */
-    public static rotateY(m: Matrix4, radians: number): Matrix4 {
-        return Matrix4.multiply(m, Matrix4.yRotation(radians));
-    }
-
-    /**
-     * Creates a matrix that rotates around the z-axis
-     * @param radians The angle to rotate
-     * @returns The z axis rotation matrix
-     */
-    public static zRotation(radians: number): Matrix4 {
-        let c = Math.cos(radians);
-        let s = Math.sin(radians);
-
-        return new Matrix4([
-            c, s, 0, 0,
-            -s, c, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1,
-        ]);
-    }
-
-    /**
-     * Rotates a matrix along the z axis by a given angle 
-     * @param m The initial matrix
-     * @param radians The angle to rotate the matrix by
-     * @returns The rotated matrix
-     */
-    public static rotateZ(m: Matrix4, radians: number): Matrix4 {
-        return Matrix4.multiply(m, Matrix4.zRotation(radians));
-    }
-
-    /**
      * Creates a scaling matrix
-     * @param sx The amount to scale the x-axis
-     * @param sy The amount to scale the y-axis
-     * @param sz The amount to scale the z-axis
+     * @param vector The amount to scale each axis
      * @returns The scaling matrix
      */
-    public static scaling(sx: number, sy: number, sz: number): Matrix4 {
+    public static scaling(vector: Vector3): Matrix4 {
         return new Matrix4([
-            sx, 0, 0, 0,
-            0, sy, 0, 0,
-            0, 0, sz, 0,
+            vector.x, 0, 0, 0,
+            0, vector.y, 0, 0,
+            0, 0, vector.z, 0,
             0, 0, 0, 1
         ]);
     }
 
     /**
      * Scales a matrix
-     * @param m The initial matrix
-     * @param sx The amount to scale the x-axis
-     * @param sy The amount to scale the y-axis
-     * @param sz The amount to scale the z-axis
+     * @param vector The amount to scale each axis
      * @returns The scaling matrix multiplied by the initial matrix
      */
-    public static scale(m: Matrix4, sx: number, sy: number, sz: number): Matrix4 {
-        return Matrix4.multiply(m, Matrix4.scaling(sx, sy, sz));
+    public scale(vector: Vector3): Matrix4 {
+        return this.multiply(Matrix4.scaling(vector));
     }
 
     public static orthographic(left: number, right: number, bottom: number, top: number, near: number, far: number): Matrix4 {
@@ -435,27 +372,26 @@ export class Matrix4 {
     }
 
     /**
-     * Gets the inverse of a matrix
-     * @param m The matrix to invert
+     * Gets the inverse of this matrix
      * @returns The inverse of the matrix
      */
-    public static inverse(m: Matrix4): Matrix4 {
-        let m00 = m.a0;
-        let m01 = m.a1;
-        let m02 = m.a2;
-        let m03 = m.a3;
-        let m10 = m.b0;
-        let m11 = m.b1;
-        let m12 = m.b2;
-        let m13 = m.b3;
-        let m20 = m.c0;
-        let m21 = m.c1;
-        let m22 = m.c2;
-        let m23 = m.c3;
-        let m30 = m.d0;
-        let m31 = m.d1;
-        let m32 = m.d2;
-        let m33 = m.d3;
+    public inverse(): Matrix4 {
+        let m00 = this.a0;
+        let m01 = this.a1;
+        let m02 = this.a2;
+        let m03 = this.a3;
+        let m10 = this.b0;
+        let m11 = this.b1;
+        let m12 = this.b2;
+        let m13 = this.b3;
+        let m20 = this.c0;
+        let m21 = this.c1;
+        let m22 = this.c2;
+        let m23 = this.c3;
+        let m30 = this.d0;
+        let m31 = this.d1;
+        let m32 = this.d2;
+        let m33 = this.d3;
         let tmp_0  = m22 * m33;
         let tmp_1  = m32 * m23;
         let tmp_2  = m12 * m33;
@@ -524,18 +460,18 @@ export class Matrix4 {
         ]);
     }
 
-    public static transformVector(m: Matrix4, v: Vector3): Vector3 {
-        return new Vector3([
-            m.a0 * v.x + m.a1 * v.y + m.a2 * v.z + m.a3,
-            m.b0 * v.x + m.b1 * v.y + m.b2 * v.z + m.b3,
-            m.c0 * v.x + m.c1 * v.y + m.c2 * v.z + m.c3,
-        ]);
+    public transformVector(v: Vector3): Vector3 {
+        return new Vector3(
+            this.a0 * v.x + this.a1 * v.y + this.a2 * v.z + this.a3,
+            this.b0 * v.x + this.b1 * v.y + this.b2 * v.z + this.b3,
+            this.c0 * v.x + this.c1 * v.y + this.c2 * v.z + this.c3,
+        );
     }
 
     public static lookAt(cameraPos: Vector3, target: Vector3, up: Vector3): Matrix4 {
-        const z = Vector3.normalize(Vector3.subtract(cameraPos, target));
-        const x = Vector3.normalize(Vector3.cross(up, z));
-        const y = Vector3.normalize(Vector3.cross(z, x));
+        const z = Vector3.normalize(cameraPos.subtract(target));
+        const x = Vector3.normalize(up.cross(z));
+        const y = Vector3.normalize(z.cross(x));
         
         return new Matrix4([
             x.x, x.y, x.z, 0,
@@ -552,66 +488,6 @@ export class Matrix4 {
             0, 0, 1, 0,
             0, 0, 0, 1
         ]);
-    }
-}
-
-export class Vector3 {
-    public x = 0;
-    public y = 0;
-    public z = 0;
-
-    constructor();
-    constructor(data: number[]);
-    constructor(x: number, y: number, z: number);
-    constructor(a?: number[] | number, b?: number, c?: number) {
-        if (a === undefined) return;
-
-        if (Array.isArray(a)) {
-            this.x = a[0];
-            this.y = a[1];
-            this.z = a[2];
-            return;
-        }
-
-        if (b === undefined || c === undefined) return;
-
-        this.x = a;
-        this.y = b;
-        this.z = c;
-    }
-
-    /**
-     * Returns the cross product of two vectors
-     * @param a Vector a
-     * @param b Vector b
-     * @returns The cross product
-     */
-    public static cross(a: Vector3, b: Vector3): Vector3 {
-        return new Vector3([a.y * b.z - a.z * b.y,
-          a.z * b.x - a.x * b.z,
-          a.x * b.y - a.y * b.x]);
-    }
-
-    public static add(a: Vector3, b: Vector3): Vector3 {
-        return new Vector3(a.x + b.x, a.y + b.y, a.z + b.z);
-    }
-
-    public static subtract(a: Vector3, b: Vector3): Vector3 {
-        return new Vector3([a.x - b.x, a.y - b.y, a.z - b.z]);
-    }
-
-    public static normalize(v: Vector3): Vector3 {
-        var length = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-        // make sure we don't divide by 0.
-        if (length > 0.00001) {
-            return new Vector3([v.x / length, v.y / length, v.z / length]);
-        } else {
-            return new Vector3([0, 0, 0]);
-        }
-    }
-
-    public static zero(): Vector3 {
-        return new Vector3([0, 0, 0]);
     }
 }
 
