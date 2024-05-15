@@ -1,8 +1,116 @@
-import { GameObject } from "../engine/objects/gameObject";
+import { Matrix4 } from "../engine/math";
+import { AttribInfo, BufferData, Renderable } from "../engine/renderer";
 
-export class TestObject extends GameObject {
+export class TestObject extends Renderable {
     constructor() {
         super();
+        
+        this.bufferData = new Map<string, AttribInfo>([
+            [
+                "inPosition",
+                {numComponents: 3, data: [
+                    -1, 1, 1,
+                    -1, -1, 1,
+                    1, 1, 1,
+
+                    1, 1, 1,
+                    -1, -1, 1,
+                    1, -1, 1,
+
+                    -1, 1, -1,
+                    -1, 1, 1,
+                    1, 1, -1,
+
+                    1, 1, -1,
+                    -1, 1, 1,
+                    1, 1, 1,
+
+                    1, 1, -1,
+                    1, 1, 1,
+                    1, -1, 1,
+
+                    1, 1, -1,
+                    1, -1, 1,
+                    1, -1, -1,
+
+                    -1, 1, 1,
+                    -1, 1, -1,
+                    -1, -1, -1,
+
+                    -1, 1, 1,
+                    -1, -1, -1,
+                    -1, -1, 1,
+
+                    -1, 1, -1,
+                    1, 1, -1,
+                    1, -1, -1,
+
+                    -1, 1, -1,
+                    1, -1, -1,
+                    -1, -1, -1,
+
+                    -1, -1, 1,
+                    1, -1, -1,
+                    1, -1, 1,
+                    
+                    -1, -1, 1,
+                    -1, -1, -1,
+                    1, -1, -1
+                ]},
+            ],
+            [
+                "inColor",
+                {numComponents: 3, data: [
+                    1, 0, 0,
+                    1, 0, 0,
+                    1, 0, 0,
+                    
+                    1, 0, 0,
+                    1, 0, 0,
+                    1, 0, 0,
+
+                    0, 1, 0,
+                    0, 1, 0,
+                    0, 1, 0,
+
+                    0, 1, 0,
+                    0, 1, 0,
+                    0, 1, 0,
+
+                    0, 0, 1,
+                    0, 0, 1,
+                    0, 0, 1,
+                    
+                    0, 0, 1,
+                    0, 0, 1,
+                    0, 0, 1,
+
+                    1, 1, 0,
+                    1, 1, 0,
+                    1, 1, 0,
+
+                    1, 1, 0,
+                    1, 1, 0,
+                    1, 1, 0,
+
+                    0, 1, 1,
+                    0, 1, 1,
+                    0, 1, 1,
+
+                    0, 1, 1,
+                    0, 1, 1,
+                    0, 1, 1,
+
+                    1, 0, 1,
+                    1, 0, 1,
+                    1, 0, 1,
+
+                    1, 0, 1,
+                    1, 0, 1,
+                    1, 0, 1,
+                ]}
+            ]
+        ]);
     }
 
     public update(dt: number): void {

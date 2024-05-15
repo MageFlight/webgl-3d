@@ -3,8 +3,8 @@ import { Matrix4, Vector3, generateID } from "../math";
 export class GameObject {
     public readonly name: string;
     public readonly id: number;
-    private _parent: GameObject | null = null;
-    private _children: GameObject[] = [];
+    protected _parent: GameObject | null = null;
+    protected _children: GameObject[] = [];
 
     constructor(name?: string) {
         this.id = generateID();

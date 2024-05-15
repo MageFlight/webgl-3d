@@ -80,7 +80,7 @@ export class Renderer {
     private drawObject(object: GameObject, parentTransform: Matrix4) {
         let transform = parentTransform;
         if (object instanceof Node3) {
-            transform = Matrix4.multiply(parentTransform, transform);
+            transform = Matrix4.multiply(parentTransform, object.transform);
         }
 
         if (object instanceof Renderable) {
@@ -92,7 +92,7 @@ export class Renderer {
             this._gl.bindVertexArray(this.getVAO(object.bufferData));
 
             // TODO: Fix checking length
-            this._gl.drawArrays(this._gl.TRIANGLES, 0, object.bufferData.get("inPosition")!.data.length);
+            this._gl.drawArrays(this._gl.TRIANGLES, 0, object.bufferData.get("inPosition")!.data.length / 3);
         }
     }
 
@@ -205,7 +205,7 @@ export class Renderer {
     }
 }
 
-export class Renderable extends GameObject {
+export class Renderable extends Node3 {
     public bufferData: BufferData = new Map();
     public uniformData: Map<string, UniformInfo> = new Map();
 
