@@ -1,4 +1,4 @@
-import { Vector2 } from "./math/vector";
+import { Vector2, Vector3 } from "./math/vector";
 
 export class KeyboardHandler {
     private registerKeyRepeat = false;
@@ -63,12 +63,21 @@ export class KeyboardHandler {
 export class MouseHandeler {
     private buttonStates = [false, false, false, false, false];
     private buttonStatesQueue = [false, false, false, false, false];
-    private position = Vector2.zero();
+    private nextPos: Vector2 | null = null;
+    private position: Vector2 | null = null;
+    private prevPos: Vector2 | null = null;
+
+    private static _instance: MouseHandeler | null = null;
   
-    constructor() {
+    private constructor() {
         addEventListener("mousemove", event => {
-            this.position.x = event.clientX;
-            this.position.y = event.clientY;
+            if (this.nextPos === null) {
+                this.nextPos = new Vector2(event.offsetX, event.offsetY);
+                this.position = new Vector2(event.offsetX, event.offsetY);
+                this.prevPos = new Vector2(event.offsetX, event.offsetY);
+            }
+            this.nextPos.x += event.movementX;
+            this.nextPos.y += event.movementY;
         });
     
         addEventListener("mousedown", event => {
@@ -79,8 +88,21 @@ export class MouseHandeler {
             this.buttonStatesQueue[event.button] = false;
         });
     }
+
+    public static get instance() {
+        if (this._instance == null) {
+            this._instance = new MouseHandeler();
+        }
+
+        return this._instance;
+    }
   
     update(): void {
+        if (this.position && this.nextPos) {
+            this.prevPos = this.position.clone();
+            this.position = this.nextPos.clone();
+        }
+
         for (let i = 0; i < this.buttonStates.length; i++) {
             this.buttonStates[i] = this.buttonStates[i] && this.buttonStatesQueue[i];
         }
@@ -91,6 +113,14 @@ export class MouseHandeler {
     }
   
     getMousePos(): Vector2 {
-        return this.position;
+        return this.position ? this.position : Vector2.zero();
+    }
+
+    public get mouseDelta(): Vector2 {
+        if (this.position && this.prevPos) {
+            return this.position.subtract(this.prevPos);
+        }
+
+        return Vector2.zero();
     }
 }

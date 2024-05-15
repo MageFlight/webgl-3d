@@ -1,4 +1,4 @@
-import { KeyboardHandler } from "./input";
+import { KeyboardHandler, MouseHandeler } from "./input";
 import { View } from "./view";
 
 export class Engine {
@@ -8,6 +8,7 @@ export class Engine {
     private _numPromises = 0;
 
     private _keyboardHandler = KeyboardHandler.instance;
+    private _mouseHandler = MouseHandeler.instance;
 
     constructor(view?: View) {
         if (!view) return;
@@ -49,6 +50,7 @@ export class Engine {
             }
 
             this._keyboardHandler.update();
+            this._mouseHandler.update();
 
             if (!this._currentView || this._numPromises > 0) return;
 

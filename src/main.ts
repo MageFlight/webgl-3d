@@ -3,6 +3,7 @@ import { GameView } from "./game/game";
 
 const canvas = document.querySelector('canvas');
 if (!canvas) throw new Error("Could not find canvas");
+canvas.addEventListener("click", () => canvas.requestPointerLock());
 
 const engine = new Engine();
 

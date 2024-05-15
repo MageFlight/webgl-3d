@@ -1,7 +1,7 @@
 import { Engine } from "../engine/engine";
-import { KeyboardHandler } from "../engine/input";
+import { KeyboardHandler, MouseHandeler } from "../engine/input";
 import { Matrix4 } from "../engine/math/matrix";
-import { Vector3 } from "../engine/math/vector";
+import { Vector2, Vector3 } from "../engine/math/vector";
 import { GameObject } from "../engine/objects/gameObject";
 import { Camera, Renderer } from "../engine/renderer";
 import { View } from "../engine/view";
@@ -13,10 +13,11 @@ export class GameView extends View {
     private _renderer: Renderer;
 
     private _keyboard = KeyboardHandler.instance;
+    private _mouse = MouseHandeler.instance;
 
     private _camera: Camera;
     private _cameraPos = new Vector3(0, 0, 5);
-    private _cameraAngle = [0, 0];
+    private _cameraAngle = Vector2.zero();
 
     constructor(engine: Engine, canvas: HTMLCanvasElement) {
         super();
@@ -49,25 +50,16 @@ export class GameView extends View {
         if (this._keyboard.isKeyDown("ShiftLeft")) direction.y -= 0.01 * dt;
         if (this._keyboard.isKeyDown("Space")) direction.y += 0.01 * dt;
 
-        const translationVector = Matrix4.rotation(new Vector3(0, 1, 0), -this._cameraAngle[0]).transformVector(direction)
+        let mouseDelta = this._mouse.mouseDelta;
+        this._cameraAngle = this._cameraAngle.add(mouseDelta.multiply(Math.PI / 720));
+
+        const translationVector = Matrix4.rotation(new Vector3(0, 1, 0), -this._cameraAngle.x).transformVector(direction);
         this._cameraPos = this._cameraPos.add(translationVector);
-        this._camera.transform = Matrix4.translation(this._cameraPos);
 
-        if (this._keyboard.isKeyDown("ArrowLeft")) {
-            this._cameraAngle[0] -= Math.PI / 720 * dt;
-        }
-        if (this._keyboard.isKeyDown("ArrowRight")) {
-            this._cameraAngle[0] += Math.PI / 720 * dt;
-        }
-        if (this._keyboard.isKeyDown("ArrowUp")) {
-            this._cameraAngle[1] += Math.PI / 720 * dt;
-        }
-        if (this._keyboard.isKeyDown("ArrowDown")) {
-            this._cameraAngle[1] -= Math.PI / 720 * dt;
-        }
-
-        this._camera.transform = this._camera.transform.rotated(new Vector3(0, 1, 0), this._cameraAngle[0]);
-        this._camera.transform = this._camera.transform.rotated(new Vector3(1, 0, 0), this._cameraAngle[1]);
+        this._camera.transform = Matrix4.identity();
+        this._camera.transform = this._camera.transform.rotated(new Vector3(0, 1, 0), this._cameraAngle.x);
+        this._camera.transform = this._camera.transform.rotated(new Vector3(1, 0, 0), this._cameraAngle.y);
+        this._camera.transform = this._camera.transform.translated(this._cameraPos);
 
         for (let i = 0; i < this._objects.length; i++) {
             this.updateObject(this._objects[i], dt);
