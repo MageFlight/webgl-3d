@@ -1,4 +1,5 @@
 import { Matrix4, Transform } from "./math/matrix";
+import { Vector3 } from "./math/vector";
 import { GameObject, Node3 } from "./objects/gameObject";
 
 export class Renderer {
@@ -199,10 +200,60 @@ export class Renderer {
         const width  = this._canvas.clientWidth;
         const height = this._canvas.clientHeight;
         if (this._canvas.width === width && this._canvas.height === height) return;
-
         this._canvas.width  = width;
         this._canvas.height = height;
     }
+
+    public static parseOBJ(file: string): BufferData {
+        let objVertecies: number[][] = [];
+        let positions: number[][] = [];
+        let colors: number[][] = [];
+
+        const keywordHandlers = new Map([
+            ["v", (parts: string[]) => {objVertecies.push(parts.map(parseFloat))}],
+            ["f", (parts: string[]) => {
+                const numTriangles = parts.length - 2;
+
+                const indicies = parts.map(vertex => parseInt(vertex.split("/")[0]) - 1);
+                const color = [Math.random(), Math.random(), Math.random()];
+                for (let tri = 0; tri < numTriangles; ++tri) {
+                    positions.push((objVertecies[indicies[0]]));
+                    positions.push((objVertecies[indicies[tri + 1]]));
+                    positions.push((objVertecies[indicies[tri + 2]]));
+
+                    colors.push(color, color, color);
+                }
+            }]
+        ]);
+       
+        const keywordRegex = /(\w+)(?: )*(.+)/;
+        const lines = file.split('\n');
+        for (let lineNum = 0; lineNum < lines.length; ++lineNum) {
+            const line = lines[lineNum].trim();
+            if (line === '' || line.startsWith('#')) {
+                continue;
+            }
+            const m = keywordRegex.exec(line);
+            if (!m) {
+                continue;
+            }
+            const [, keyword, unparsedArgs] = m;
+            const args = unparsedArgs.split(/\s+/);
+            const handler = keywordHandlers.get(keyword);
+            if (!handler) {
+                console.warn('unhandled keyword:', keyword, 'at line', lineNum + 1);
+                continue;
+            }
+            handler(args);
+        }
+
+        const result: BufferData = new Map([
+            ["inPosition", {numComponents: 3, data: positions.flat()}],
+            ["inColor", {numComponents: 3, data: colors.flat()}]
+        ]);
+
+        return result;
+    } 
 }
 
 export class Renderable extends Node3 {

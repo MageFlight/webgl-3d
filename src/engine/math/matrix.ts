@@ -541,15 +541,15 @@ export class Basis {
     }
 
     public scale(scale: Vector3): void {
-        this.rows[0].x = scale.x;
-        this.rows[0].y = scale.x;
-        this.rows[0].z = scale.x;
-        this.rows[1].x = scale.y;
-        this.rows[1].y = scale.y;
-        this.rows[1].z = scale.y;
-        this.rows[2].x = scale.z;
-        this.rows[2].y = scale.z;
-        this.rows[2].z = scale.z;
+        this.rows[0].x *= scale.x;
+        this.rows[0].y *= scale.x;
+        this.rows[0].z *= scale.x;
+        this.rows[1].x *= scale.y;
+        this.rows[1].y *= scale.y;
+        this.rows[1].z *= scale.y;
+        this.rows[2].x *= scale.z;
+        this.rows[2].y *= scale.z;
+        this.rows[2].z *= scale.z;
     }
 
     public scaled(scale: Vector3): Basis {
