@@ -1,4 +1,4 @@
-import { Matrix4 } from "./math/matrix";
+import { Matrix4, Transform } from "./math/matrix";
 import { GameObject, Node3 } from "./objects/gameObject";
 
 export class Renderer {
@@ -61,7 +61,7 @@ export class Renderer {
         let viewMatrix = Matrix4.identity();
 
         if (Renderer.activeCamera) {
-            viewMatrix = Renderer.activeCamera.transform.inverse();
+            viewMatrix = Renderer.activeCamera.transform.toMatrix().inverse();
         }
 
         const aspect = this._canvas.clientWidth / this._canvas.clientHeight;
@@ -73,11 +73,11 @@ export class Renderer {
         this._gl.uniformMatrix4fv(viewProjectionLocation, false, viewProjection.toArray());
 
         for (let i = 0; i < tree.length; i++) {
-            this.drawObject(tree[i], Matrix4.identity());
+            this.drawObject(tree[i], new Transform());
         }
     }
 
-    private drawObject(object: GameObject, parentTransform: Matrix4) {
+    private drawObject(object: GameObject, parentTransform: Transform) {
         let transform = parentTransform;
         if (object instanceof Node3) {
             transform = parentTransform.multiply(object.transform);

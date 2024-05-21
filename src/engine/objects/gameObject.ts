@@ -1,4 +1,4 @@
-import { Matrix4, generateID } from "../math/matrix";
+import { Transform, generateID } from "../math/matrix";
 
 export class GameObject {
     public readonly name: string;
@@ -39,8 +39,8 @@ export class GameObject {
 }
 
 export class Node3 extends GameObject {
-    public transform: Matrix4 = Matrix4.identity();
+    public transform: Transform = new Transform();
 
     public update(dt: number): void {}
-    public async load(): Promise<void> {}  
+    public async load(): Promise<void> {}
 }

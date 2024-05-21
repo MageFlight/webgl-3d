@@ -491,6 +491,193 @@ export class Matrix4 {
     }
 }
 
+export class Basis {
+    public rows = [
+        new Vector3(1, 0, 0),
+        new Vector3(0, 1, 0),
+        new Vector3(0, 0, 1)
+    ];
+
+    public constructor();
+    public constructor(xx?: number, xy?: number, xz?: number, yx?: number, yy?: number, yz?: number, zx?: number, zy?: number, zz?: number);
+    public constructor(xx?: number, xy?: number, xz?: number, yx?: number, yy?: number, yz?: number, zx?: number, zy?: number, zz?: number) {
+        if (xx !== undefined) this.rows[0].x = xx;
+        if (xy !== undefined) this.rows[0].y = xy;
+        if (xz !== undefined) this.rows[0].z = xz;
+        if (yx !== undefined) this.rows[1].x = yx;
+        if (yy !== undefined) this.rows[1].y = yy;
+        if (yz !== undefined) this.rows[1].z = yz;
+        if (zx !== undefined) this.rows[2].x = zx;
+        if (zy !== undefined) this.rows[2].y = zy;
+        if (zz !== undefined) this.rows[2].z = zz;
+    }
+
+    private tdotx(v: Vector3) {
+        return this.rows[0].x * v.x + this.rows[1].x * v.y + this.rows[2].x * v.z;
+    }
+
+    private tdoty(v: Vector3) {
+        return this.rows[0].y * v.x + this.rows[1].y * v.y + this.rows[2].y * v.z;
+    }
+
+    private tdotz(v: Vector3) {
+        return this.rows[0].z * v.x + this.rows[1].z * v.y + this.rows[2].z * v.z;
+    }
+
+    public multiply(right: Basis) {
+        return new Basis(
+            right.tdotx(this.rows[0]), right.tdoty(this.rows[0]), right.tdotz(this.rows[0]),
+            right.tdotx(this.rows[1]), right.tdoty(this.rows[1]), right.tdotz(this.rows[1]),
+            right.tdotx(this.rows[2]), right.tdoty(this.rows[2]), right.tdotz(this.rows[2])
+        );
+    }
+
+    public transform(vec: Vector3) {
+        return new Vector3(
+            this.rows[0].dot(vec),
+            this.rows[1].dot(vec),
+            this.rows[2].dot(vec),
+        )
+    }
+
+    public scale(scale: Vector3): void {
+        this.rows[0].x = scale.x;
+        this.rows[0].y = scale.x;
+        this.rows[0].z = scale.x;
+        this.rows[1].x = scale.y;
+        this.rows[1].y = scale.y;
+        this.rows[1].z = scale.y;
+        this.rows[2].x = scale.z;
+        this.rows[2].y = scale.z;
+        this.rows[2].z = scale.z;
+    }
+
+    public scaled(scale: Vector3): Basis {
+        const result = this.clone();
+        result.scale(scale);
+        return result;
+    }
+
+    public static rotation(axis: Vector3, angle: number): Basis {
+        const result = new Basis();
+        const axisSquared = new Vector3(axis.x * axis.x, axis.y * axis.y, axis.z * axis.z);
+        const cos = Math.cos(angle);
+        result.rows[0].x = axisSquared.x + cos * (1 - axisSquared.x);
+        result.rows[1].y = axisSquared.y + cos * (1 - axisSquared.y);
+        result.rows[2].z = axisSquared.z + cos * (1 - axisSquared.z);
+
+        const sin = Math.sin(angle);
+        const t = 1 - cos;
+
+        let xyzt = axis.x * axis.y * t;
+        let zyxs = axis.z * sin;
+        result.rows[0].y = xyzt - zyxs;
+        result.rows[1].x = xyzt + zyxs;
+
+        xyzt = axis.x * axis.z * t;
+        zyxs = axis.y * sin;
+        result.rows[0].z = xyzt + zyxs;
+        result.rows[2].x = xyzt - zyxs;
+
+        xyzt = axis.y * axis.z * t;
+        zyxs = axis.x * sin;
+        result.rows[1].z = xyzt - zyxs;
+        result.rows[2].y = xyzt + zyxs;
+
+        return result;
+    }
+
+    public rotated(axis: Vector3, angle: number): Basis {
+        return Basis.rotation(axis, angle).multiply(this);
+    }
+
+    public clone(): Basis {
+        const newBasis = new Basis();
+        newBasis.rows[0] = this.rows[0].clone();
+        newBasis.rows[1] = this.rows[1].clone();
+        newBasis.rows[2] = this.rows[2].clone();
+        return newBasis;
+    }
+
+    public lookingAt(target: Vector3, up: Vector3) {
+        const z = Vector3.normalize(target);
+        const x = Vector3.normalize(up.cross(z));
+        const y = Vector3.normalize(z.cross(x));
+        
+        return new Basis(
+            x.x, x.y, x.z,
+            y.x, y.y, y.z,
+            z.x, z.y, z.z);
+    }
+
+    public transpose() {
+        return new Basis(
+            this.rows[0].x, this.rows[1].x, this.rows[2].x,
+            this.rows[0].y, this.rows[1].y, this.rows[2].y,
+            this.rows[0].z, this.rows[1].z, this.rows[2].z
+        );
+    }
+}
+
+export class Transform {
+    public basis: Basis = new Basis();
+    public origin: Vector3 = new Vector3();
+
+    public constructor();
+    public constructor(basis: Basis, origin: Vector3);
+    public constructor(basis?: Basis, origin?: Vector3) {
+        if (basis) this.basis = basis;
+        if (origin) this.origin = origin;
+    }
+
+    public translated(translation: Vector3) {
+        return new Transform(this.basis.clone(), this.origin.add(translation));
+    }
+
+    public translatedLocal(translation: Vector3) {
+        return new Transform(this.basis.clone(), this.origin.add(this.basis.transform(translation)));
+    }
+
+    public transform(vec: Vector3) {
+        return this.basis.transform(vec).add(this.origin);
+    }
+
+    public clone() {
+        return new Transform(this.basis.clone(), this.origin.clone());
+    }
+
+    public lookingAt(target: Vector3, up: Vector3) {
+        return new Transform(this.basis.lookingAt(target.subtract(this.origin), up), this.origin.clone());
+    }
+
+    public inverse() {
+        const transpose = this.basis.transpose();
+        const newOrigin = transpose.transform(this.origin.multiply(-1));
+        newOrigin.x *= -1;
+        return new Transform(transpose, newOrigin);
+    }
+
+    public toArray() {
+        return [
+            this.basis.rows[0].x, this.basis.rows[0].y, this.basis.rows[0].z, 0,
+            this.basis.rows[1].x, this.basis.rows[1].y, this.basis.rows[1].z, 0,
+            this.basis.rows[2].x, this.basis.rows[2].y, this.basis.rows[2].z, 0,
+            this.origin.x, this.origin.y, this.origin.z, 1
+        ];
+    }
+
+    public toMatrix() {
+        return new Matrix4(this.toArray());
+    }
+
+    public multiply(right: Transform) {
+        const result = this.clone();
+        result.origin = result.transform(right.origin);
+        result.basis = result.basis.multiply(right.basis);
+        return result;
+    }
+}
+
 let currentID = 0;
 export function generateID(): number {
     return currentID++;

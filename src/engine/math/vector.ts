@@ -34,6 +34,12 @@ export class Vector3 {
         return new Vector3(this.x - right.x, this.y - right.y, this.z - right.z);
     }
 
+    public multiply(right: Vector3 | number): Vector3 {
+        if (right instanceof Vector3) return new Vector3(this.x * right.x, this.y * right.y, this.z * right.z);
+        
+        return new Vector3(this.x * right, this.y * right, this.z * right);
+    }
+
     public static normalize(v: Vector3): Vector3 {
         var length = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
         // make sure we don't divide by 0.
@@ -55,6 +61,18 @@ export class Vector3 {
     public static down(): Vector3 {
         return new Vector3(0, -1, 0);
     }
+
+    public clone() {
+        return new Vector3(this.x, this.y, this.z);
+    }
+
+    public dot(other: Vector3) {
+        return this.x * other.x + this.y * other.y + this.z * other.z;
+    }
+
+    public equals(other: Vector3) {
+        return this.x === other.x && this.y === other.y && this.z === other.z;
+    }
 }
 
 export class Vector2 {
@@ -67,8 +85,8 @@ export class Vector2 {
      * @param {number} y Initial y-value of the vector
      */
     constructor(x: number, y: number) {
-      this.x = x;
-      this.y = y;
+        this.x = x;
+        this.y = y;
     }
   
     /**
@@ -76,7 +94,7 @@ export class Vector2 {
      * @returns A new Zero vector2
      */
     static zero() {
-      return new Vector2(0, 0);
+        return new Vector2(0, 0);
     }
   
     /**
@@ -84,7 +102,7 @@ export class Vector2 {
      * @returns A new one vector2
      */
     static one() {
-      return new Vector2(1, 1);
+        return new Vector2(1, 1);
     }
   
     /**
@@ -92,7 +110,7 @@ export class Vector2 {
      * @returns A new Vector with components of 0 and -1.
      */
     static up() {
-      return new Vector2(0, -1);
+        return new Vector2(0, -1);
     }
   
     /**
@@ -100,7 +118,7 @@ export class Vector2 {
      * @returns A new Vector with components of 0 and 1.
      */
     static down() {
-      return new Vector2(0, 1);
+        return new Vector2(0, 1);
     }
   
     /**
@@ -108,7 +126,7 @@ export class Vector2 {
      * @returns A new Vector with components of -1 and 0.
      */
     static left() {
-      return new Vector2(-1, 0);
+        return new Vector2(-1, 0);
     }
   
     /**
@@ -116,7 +134,7 @@ export class Vector2 {
      * @returns A new Vector with components of 1 and 0.
      */
     static right() {
-      return new Vector2(1, 0);
+        return new Vector2(1, 0);
     }
   
     /**
@@ -125,7 +143,7 @@ export class Vector2 {
      * @returns The resulting vector.
      */
     add(right: Vector2) {
-      return new Vector2(this.x + right.x, this.y + right.y);
+        return new Vector2(this.x + right.x, this.y + right.y);
     }
   
     /**
@@ -134,7 +152,7 @@ export class Vector2 {
      * @returns The resulting vector.
      */
     subtract(right: Vector2) {
-      return new Vector2(this.x - right.x, this.y - right.y);
+        return new Vector2(this.x - right.x, this.y - right.y);
     }
   
     /**
@@ -146,11 +164,11 @@ export class Vector2 {
     multiply(vec: Vector2): Vector2;
   
     multiply(n: number | Vector2) {
-      if (n instanceof Vector2) {
-        return new Vector2(this.x * n.x, this.y * n.y);
-      } else {
-        return new Vector2(this.x * n, this.y * n);
-      }
+        if (n instanceof Vector2) {
+            return new Vector2(this.x * n.x, this.y * n.y);
+        } else {
+            return new Vector2(this.x * n, this.y * n);
+        }
     }
   
     /**
@@ -159,34 +177,34 @@ export class Vector2 {
      * @returns The resulting vector.
      */
     divide(n: number) {
-      return new Vector2(this.x / n, this.y / n);
+        return new Vector2(this.x / n, this.y / n);
     }
   
     abs(): Vector2 {
-      return new Vector2(Math.abs(this.x), Math.abs(this.y));
+        return new Vector2(Math.abs(this.x), Math.abs(this.y));
     }
   
     mod(n: number): Vector2 {
-      return new Vector2(this.x % n, this.y % n);
+        return new Vector2(this.x % n, this.y % n);
     }
   
     swapComponents(): Vector2 {
-      return new Vector2(this.y, this.x);
+        return new Vector2(this.y, this.x);
     }
   
     normalize(): Vector2 {
-      let length = this.x * this.x + this.y * this.y;
-      if (length > 0) {
-        length = Math.sqrt(length);
-        const inverseLength = 1.0 / length;
-        return new Vector2(this.x * inverseLength, this.y * inverseLength);
-      } else {
-        return new Vector2(1, 0);
-      }
+        let length = this.x * this.x + this.y * this.y;
+        if (length > 0) {
+            length = Math.sqrt(length);
+            const inverseLength = 1.0 / length;
+            return new Vector2(this.x * inverseLength, this.y * inverseLength);
+        } else {
+            return new Vector2(1, 0);
+        }
     }
   
     sign(): Vector2 {
-      return new Vector2(Math.sign(this.x), Math.sign(this.y));
+        return new Vector2(Math.sign(this.x), Math.sign(this.y));
     }
   
     /**
@@ -194,15 +212,15 @@ export class Vector2 {
      * @returns The clone of this vector
      */
     clone() {
-      return new Vector2(this.x, this.y);
+        return new Vector2(this.x, this.y);
     }
   
     length(): number {
-      return Math.sqrt((this.x * this.x) + (this.y * this.y));
+        return Math.sqrt((this.x * this.x) + (this.y * this.y));
     }
   
     lengthSquared(): number {
-      return (this.x * this.x) + (this.y * this.y);
+        return (this.x * this.x) + (this.y * this.y);
     }
   
     /**
@@ -211,6 +229,6 @@ export class Vector2 {
      * @returns The result of the comparison.
      */
     equals(vector2: Vector2) {
-      return this.x == vector2.x && this.y == vector2.y;
+        return this.x == vector2.x && this.y == vector2.y;
     }
-  }
+}

@@ -1,6 +1,6 @@
 import { Engine } from "../engine/engine";
 import { KeyboardHandler, MouseHandeler } from "../engine/input";
-import { Matrix4 } from "../engine/math/matrix";
+import { Basis, Matrix4 } from "../engine/math/matrix";
 import { Vector2, Vector3 } from "../engine/math/vector";
 import { GameObject } from "../engine/objects/gameObject";
 import { Camera, Renderer } from "../engine/renderer";
@@ -24,7 +24,8 @@ export class GameView extends View {
 
         this._engine = engine;
         this._camera = new Camera();
-        this._camera.transform = Matrix4.lookAt(this._cameraPos, Vector3.zero(), Vector3.up());
+        this._camera.transform.origin = this._cameraPos;
+
         this._objects.push(new TestObject(), this._camera);
 
         this._renderer = new Renderer(canvas);
@@ -50,16 +51,15 @@ export class GameView extends View {
         if (this._keyboard.isKeyDown("ShiftLeft")) direction.y -= 0.01 * dt;
         if (this._keyboard.isKeyDown("Space")) direction.y += 0.01 * dt;
 
-        let mouseDelta = this._mouse.mouseDelta;
-        this._cameraAngle = this._cameraAngle.add(mouseDelta.multiply(Math.PI / 720));
+        let turnAmount = this._mouse.mouseDelta.multiply(Math.PI / 720);
+        this._cameraAngle = this._cameraAngle.add(turnAmount);
 
         const translationVector = Matrix4.rotation(new Vector3(0, 1, 0), -this._cameraAngle.x).transformVector(direction);
-        this._cameraPos = this._cameraPos.add(translationVector);
+        this._camera.transform.origin = this._camera.transform.origin.add(translationVector);
 
-        this._camera.transform = Matrix4.identity();
-        this._camera.transform = this._camera.transform.rotated(new Vector3(0, 1, 0), this._cameraAngle.x);
-        this._camera.transform = this._camera.transform.rotated(new Vector3(1, 0, 0), this._cameraAngle.y);
-        this._camera.transform = this._camera.transform.translated(this._cameraPos);
+        this._camera.transform.basis = new Basis();
+        this._camera.transform.basis = this._camera.transform.basis.rotated(new Vector3(0, 1, 0), this._cameraAngle.x);
+        this._camera.transform.basis = this._camera.transform.basis.rotated(new Vector3(1, 0, 0), this._cameraAngle.y);
 
         for (let i = 0; i < this._objects.length; i++) {
             this.updateObject(this._objects[i], dt);

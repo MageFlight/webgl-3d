@@ -1,5 +1,4 @@
-import { Vector3 } from "../engine/math/vector";
-import { AttribInfo, BufferData, Renderable } from "../engine/renderer";
+import { AttribInfo, Renderable } from "../engine/renderer";
 
 export class TestObject extends Renderable {
     constructor() {
@@ -114,7 +113,7 @@ export class TestObject extends Renderable {
     }
 
     public update(dt: number): void {
-        const framerate = dt;
+        // const framerate = dt;
 
         // const title = document.querySelector("title");
         // if (!title) return;
