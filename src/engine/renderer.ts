@@ -204,10 +204,49 @@ export class Renderer {
         this._canvas.height = height;
     }
 
-    public static parseOBJ(file: string): BufferData {
+    public static parseMTL(file: string): Map<string, Material> {
+        const materials: Map<string, Material> = new Map();
+
+        let currentMaterial = "default";
+
+        const keywordHandlers = new Map([
+            ["newmtl", (parts: string[]) => currentMaterial = parts[0]],
+            ["Kd", (parts: string[]) => {
+                const color = parts.map(parseFloat);
+                materials.set(currentMaterial, {color: new Vector3(color[0], color[1], color[2])});
+            }]
+        ]);
+       
+        const keywordRegex = /(\w+)(?: )*(.+)/;
+        const lines = file.split('\n');
+        for (let lineNum = 0; lineNum < lines.length; ++lineNum) {
+            const line = lines[lineNum].trim();
+            if (line === '' || line.startsWith('#')) {
+                continue;
+            }
+            const m = keywordRegex.exec(line);
+            if (!m) {
+                continue;
+            }
+            const [, keyword, unparsedArgs] = m;
+            const args = unparsedArgs.split(/\s+/);
+            const handler = keywordHandlers.get(keyword);
+            if (!handler) {
+                console.warn('unhandled keyword:', keyword, 'at line', lineNum + 1);
+                continue;
+            }
+            handler(args);
+        }
+
+        return materials;
+    }
+
+    public static parseOBJ(file: string, materials: Map<string, Material>): BufferData {
         let objVertecies: number[][] = [];
         let positions: number[][] = [];
         let colors: number[][] = [];
+
+        let currentMaterial = "default";
 
         const keywordHandlers = new Map([
             ["v", (parts: string[]) => {objVertecies.push(parts.map(parseFloat))}],
@@ -215,7 +254,9 @@ export class Renderer {
                 const numTriangles = parts.length - 2;
 
                 const indicies = parts.map(vertex => parseInt(vertex.split("/")[0]) - 1);
-                const color = [Math.random(), Math.random(), Math.random()];
+                const material = materials.get(currentMaterial);
+                const color = material ? material.color.toArray() : [1, 0, 0];
+
                 for (let tri = 0; tri < numTriangles; ++tri) {
                     positions.push((objVertecies[indicies[0]]));
                     positions.push((objVertecies[indicies[tri + 1]]));
@@ -223,7 +264,8 @@ export class Renderer {
 
                     colors.push(color, color, color);
                 }
-            }]
+            }],
+            ["usemtl", (parts: string[]) => currentMaterial = parts[0]]
         ]);
        
         const keywordRegex = /(\w+)(?: )*(.+)/;
@@ -289,3 +331,4 @@ export class Camera extends Node3 {
 export type BufferData = Map<string, AttribInfo>;
 export type AttribInfo = { numComponents: number, data: number[] };
 export type UniformInfo = { dimension: number, isMatrix: boolean, data: number[] };
+export type Material = { color: Vector3 };

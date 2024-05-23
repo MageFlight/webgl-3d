@@ -73,6 +73,10 @@ export class Vector3 {
     public equals(other: Vector3) {
         return this.x === other.x && this.y === other.y && this.z === other.z;
     }
+
+    public toArray() {
+        return [this.x, this.y, this.z];
+    }
 }
 
 export class Vector2 {

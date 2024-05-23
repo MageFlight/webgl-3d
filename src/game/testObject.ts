@@ -1,122 +1,16 @@
 
 import { AttribInfo, Renderable, Renderer } from "../engine/renderer";
 import model from '../../assets/models/bottle.obj?raw';
+import materials from '../../assets/models/bottle.mtl?raw';
 import { Vector3 } from "../engine/math/vector";
 
 export class TestObject extends Renderable {
     constructor() {
         super();
-        
-        // this.bufferData = new Map<string, AttribInfo>([
-        //     [
-        //         "inPosition",
-        //         {numComponents: 3, data: [
-        //             -1, 1, 1,
-        //             -1, -1, 1,
-        //             1, 1, 1,
 
-        //             1, 1, 1,
-        //             -1, -1, 1,
-        //             1, -1, 1,
-
-        //             -1, 1, -1,
-        //             -1, 1, 1,
-        //             1, 1, -1,
-
-        //             1, 1, -1,
-        //             -1, 1, 1,
-        //             1, 1, 1,
-
-        //             1, 1, -1,
-        //             1, 1, 1,
-        //             1, -1, 1,
-
-        //             1, 1, -1,
-        //             1, -1, 1,
-        //             1, -1, -1,
-
-        //             -1, 1, 1,
-        //             -1, 1, -1,
-        //             -1, -1, -1,
-
-        //             -1, 1, 1,
-        //             -1, -1, -1,
-        //             -1, -1, 1,
-
-        //             -1, 1, -1,
-        //             1, 1, -1,
-        //             1, -1, -1,
-
-        //             -1, 1, -1,
-        //             1, -1, -1,
-        //             -1, -1, -1,
-
-        //             -1, -1, 1,
-        //             1, -1, -1,
-        //             1, -1, 1,
-                    
-        //             -1, -1, 1,
-        //             -1, -1, -1,
-        //             1, -1, -1
-        //         ]},
-        //     ],
-        //     [
-        //         "inColor",
-        //         {numComponents: 3, data: [
-        //             1, 0, 0,
-        //             1, 0, 0,
-        //             1, 0, 0,
-                    
-        //             1, 0, 0,
-        //             1, 0, 0,
-        //             1, 0, 0,
-
-        //             0, 1, 0,
-        //             0, 1, 0,
-        //             0, 1, 0,
-
-        //             0, 1, 0,
-        //             0, 1, 0,
-        //             0, 1, 0,
-
-        //             0, 0, 1,
-        //             0, 0, 1,
-        //             0, 0, 1,
-                    
-        //             0, 0, 1,
-        //             0, 0, 1,
-        //             0, 0, 1,
-
-        //             1, 1, 0,
-        //             1, 1, 0,
-        //             1, 1, 0,
-
-        //             1, 1, 0,
-        //             1, 1, 0,
-        //             1, 1, 0,
-
-        //             0, 1, 1,
-        //             0, 1, 1,
-        //             0, 1, 1,
-
-        //             0, 1, 1,
-        //             0, 1, 1,
-        //             0, 1, 1,
-
-        //             1, 0, 1,
-        //             1, 0, 1,
-        //             1, 0, 1,
-
-        //             1, 0, 1,
-        //             1, 0, 1,
-        //             1, 0, 1,
-        //         ]}
-        //     ]
-        // ]);
-
-        this.bufferData = Renderer.parseOBJ(model);
-        this.transform.basis = this.transform.basis.scaled(new Vector3(10, 10, 10));
-        alert("basis: " + JSON.stringify(this.transform.basis));
+        const parsedMaterials = Renderer.parseMTL(materials);
+        this.bufferData = Renderer.parseOBJ(model, parsedMaterials);
+        this.transform.basis = this.transform.basis.scaled(new Vector3(20, 20, 20));
     }
 
     public update(dt: number): void {
