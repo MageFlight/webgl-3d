@@ -1,8 +1,10 @@
 
 import { AttribInfo, Renderable, Renderer } from "../engine/renderer";
-import model from '../../assets/models/bottle.obj?raw';
-import materials from '../../assets/models/bottle.mtl?raw';
+import model from '../../assets/models/cube.obj?raw';
+import materials from '../../assets/models/cube.mtl?raw';
 import { Vector3 } from "../engine/math/vector";
+import { AABB, CharacterBody } from "../engine/objects/physicsObject";
+import { PhysicsEngine } from "../engine/physics";
 
 export class TestObject extends Renderable {
     constructor() {
@@ -10,7 +12,6 @@ export class TestObject extends Renderable {
 
         const parsedMaterials = Renderer.parseMTL(materials);
         this.bufferData = Renderer.parseOBJ(model, parsedMaterials);
-        this.transform.basis = this.transform.basis.scaled(new Vector3(20, 20, 20));
     }
 
     public update(dt: number): void {
@@ -26,4 +27,21 @@ export class TestObject extends Renderable {
         return;
     }
 
+}
+
+export class Player extends CharacterBody {
+    constructor() {
+        super(new AABB(Vector3.zero(), new Vector3(1, 1, 1)));
+
+        const display = new Renderable();
+        const material = Renderer.parseMTL(materials);
+        display.bufferData = Renderer.parseOBJ(model, material);
+        display.parent = this;
+        this.velocity = new Vector3(0, -0.05, 0);
+    }
+
+    public physicsUpdate(physics: PhysicsEngine, dt: number): void {
+        const time = physics.rectangleCast(this.collider, this.velocity);
+        this.transform.origin = this.transform.origin.add(this.velocity.multiply(time));
+    }
 }

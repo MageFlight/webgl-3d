@@ -43,4 +43,20 @@ export class Node3 extends GameObject {
 
     public update(dt: number): void {}
     public async load(): Promise<void> {}
+
+    get globalTransform() {
+        if (this.parent === null) {
+            return this.transform;
+        }
+        
+        const parentGlobal = this.parentGlobalTransform(this);
+        if (parentGlobal === null) return this.transform;
+        return parentGlobal.multiply(this.transform);
+    }
+    
+    private parentGlobalTransform(obj: GameObject): Transform | null {
+        if (obj.parent instanceof Node3) return obj.parent.globalTransform;
+        if (obj.parent === null) return null;
+        return this.parentGlobalTransform(obj.parent);
+    }
 }

@@ -95,6 +95,10 @@ export class Renderer {
             // TODO: Fix checking length
             this._gl.drawArrays(this._gl.TRIANGLES, 0, object.bufferData.get("inPosition")!.data.length / 3);
         }
+
+        for (let i = 0; i < object.children.length; i++) {
+            this.drawObject(object.children[i], transform);
+        }
     }
 
     private getVAO(data: BufferData): WebGLVertexArrayObject {

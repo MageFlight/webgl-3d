@@ -3,9 +3,11 @@ import { KeyboardHandler, MouseHandeler } from "../engine/input";
 import { Basis, Matrix4 } from "../engine/math/matrix";
 import { Vector2, Vector3 } from "../engine/math/vector";
 import { GameObject } from "../engine/objects/gameObject";
+import { PhysicsBody } from "../engine/objects/physicsObject";
+import { PhysicsEngine } from "../engine/physics";
 import { Camera, Renderer } from "../engine/renderer";
 import { View } from "../engine/view";
-import { TestObject } from "./testObject";
+import { Player, TestObject } from "./testObject";
 
 export class GameView extends View {
     private _objects: GameObject[] = [];
@@ -16,8 +18,10 @@ export class GameView extends View {
     private _mouse = MouseHandeler.instance;
 
     private _camera: Camera;
-    private _cameraPos = new Vector3(0, 0, 5);
+    private _cameraPos = new Vector3(3, 3, 3);
     private _cameraAngle = Vector2.zero();
+
+    private _physics: PhysicsEngine;
 
     constructor(engine: Engine, canvas: HTMLCanvasElement) {
         super();
@@ -26,9 +30,10 @@ export class GameView extends View {
         this._camera = new Camera();
         this._camera.transform.origin = this._cameraPos;
 
-        this._objects.push(new TestObject(), this._camera);
+        this._objects.push(new Player(), this._camera);
 
         this._renderer = new Renderer(canvas);
+        this._physics = new PhysicsEngine(this._objects);
     }
 
     public async init(): Promise<void> {
@@ -63,6 +68,13 @@ export class GameView extends View {
 
         for (let i = 0; i < this._objects.length; i++) {
             this.updateObject(this._objects[i], dt);
+        }
+
+        for (let i = 0; i < this._objects.length; i++) {
+            const obj = this._objects[i];
+            if (obj instanceof PhysicsBody) {
+                obj.physicsUpdate(this._physics, dt);
+            }
         }
 
         this._renderer.drawTree(this._objects);
