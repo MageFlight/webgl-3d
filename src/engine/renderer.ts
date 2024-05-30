@@ -62,11 +62,11 @@ export class Renderer {
         let viewMatrix = Matrix4.identity();
 
         if (Renderer.activeCamera) {
-            viewMatrix = Renderer.activeCamera.transform.toMatrix().inverse();
+            viewMatrix = Renderer.activeCamera.globalTransform.toMatrix().inverse();
         }
 
         const aspect = this._canvas.clientWidth / this._canvas.clientHeight;
-        const projection = Matrix4.perspective(70 * Math.PI / 180, aspect, 1, 2000);
+        const projection = Matrix4.perspective(70 * Math.PI / 180, aspect, 0.2, 2000);
 
         const viewProjection = projection.multiply(viewMatrix);
 
