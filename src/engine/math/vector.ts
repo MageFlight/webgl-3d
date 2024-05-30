@@ -77,6 +77,10 @@ export class Vector3 {
     public toArray() {
         return [this.x, this.y, this.z];
     }
+
+    public abs() {
+        return new Vector3(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
+    }
 }
 
 export class Vector2 {

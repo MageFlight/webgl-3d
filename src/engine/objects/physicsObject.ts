@@ -9,6 +9,7 @@ export abstract class PhysicsBody extends Node3 {
         super(name);
 
         this.collider = collider;
+        collider.parent = this;
     }
 
     public abstract physicsUpdate(physics: PhysicsEngine, dt: number): void;

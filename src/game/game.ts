@@ -3,11 +3,14 @@ import { KeyboardHandler, MouseHandeler } from "../engine/input";
 import { Basis, Matrix4 } from "../engine/math/matrix";
 import { Vector2, Vector3 } from "../engine/math/vector";
 import { GameObject } from "../engine/objects/gameObject";
-import { PhysicsBody } from "../engine/objects/physicsObject";
+import { AABB, PhysicsBody, StaticBody } from "../engine/objects/physicsObject";
 import { PhysicsEngine } from "../engine/physics";
-import { Camera, Renderer } from "../engine/renderer";
+import { Camera, Renderable, Renderer } from "../engine/renderer";
 import { View } from "../engine/view";
 import { Player, TestObject } from "./testObject";
+import model from '../../assets/models/cube.obj?raw';
+import materials from '../../assets/models/cube.mtl?raw';
+
 
 export class GameView extends View {
     private _objects: GameObject[] = [];
@@ -18,7 +21,7 @@ export class GameView extends View {
     private _mouse = MouseHandeler.instance;
 
     private _camera: Camera;
-    private _cameraPos = new Vector3(3, 3, 3);
+    private _cameraPos = new Vector3(0, 1.5, 2);
     private _cameraAngle = Vector2.zero();
 
     private _physics: PhysicsEngine;
@@ -30,7 +33,18 @@ export class GameView extends View {
         this._camera = new Camera();
         this._camera.transform.origin = this._cameraPos;
 
-        this._objects.push(new Player(), this._camera);
+        const floor = new StaticBody(new AABB(Vector3.zero(), new Vector3(1, 1, 1)), "floor");
+        floor.transform.origin = new Vector3(0, -5, 0);
+
+        const floorModel = new Renderable();
+        floorModel.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(materials));
+        floorModel.parent = floor;
+
+        const model1 = new Renderable();
+        model1.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(materials));
+        model1.transform.origin.y = 0.5;
+
+        this._objects.push(new Player(), floor, model1, this._camera);
 
         this._renderer = new Renderer(canvas);
         this._physics = new PhysicsEngine(this._objects);

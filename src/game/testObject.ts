@@ -31,9 +31,9 @@ export class TestObject extends Renderable {
 
 export class Player extends CharacterBody {
     constructor() {
-        super(new AABB(Vector3.zero(), new Vector3(1, 1, 1)));
+        super(new AABB(Vector3.zero(), new Vector3(1, 1, 1), "playerCollider"), "player");
 
-        const display = new Renderable();
+        const display = new Renderable("playerDisplay");
         const material = Renderer.parseMTL(materials);
         display.bufferData = Renderer.parseOBJ(model, material);
         display.parent = this;
@@ -43,5 +43,7 @@ export class Player extends CharacterBody {
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
         const time = physics.rectangleCast(this.collider, this.velocity);
         this.transform.origin = this.transform.origin.add(this.velocity.multiply(time));
+        // alert("Collision is " + time);
+        // alert("pos: " + JSON.stringify(this.transform.origin));
     }
 }

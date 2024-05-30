@@ -51,6 +51,7 @@ export class Node3 extends GameObject {
         
         const parentGlobal = this.parentGlobalTransform(this);
         if (parentGlobal === null) return this.transform;
+        // alert("parentGlobal: " + JSON.stringify(parentGlobal));
         return parentGlobal.multiply(this.transform);
     }
     
