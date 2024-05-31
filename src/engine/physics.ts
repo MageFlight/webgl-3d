@@ -9,7 +9,7 @@ export class PhysicsEngine {
         this.tree = objectTree;
     }
 
-    public rectangleCast(collider: AABB, velocity: Vector3) {
+    public rectangleCast(collider: AABB, velocity: Vector3): CollisionData | null {
         const globalPos = collider.globalTransform.origin;
         const broadBox = new AABB(
             globalPos.add(velocity.multiply(0.5)),
@@ -47,18 +47,18 @@ export class PhysicsEngine {
         );
     }
 
-    private sweepObjects(collider: AABB, objects: PhysicsBody[], velocity: Vector3): number {
+    private sweepObjects(collider: AABB, objects: PhysicsBody[], velocity: Vector3): CollisionData | null {
         for (const obj of objects) {
             if (obj instanceof StaticBody && obj.collider !== undefined && obj.collider !== collider) {
-                const time = this.sweepAABB(collider, obj.collider, velocity);
-                if (time !== -1) return time;
+                const collision = this.sweepAABB(collider, obj.collider, velocity);
+                if (collision !== null) return collision;
             }
         }
 
-        return 1;
+        return null;
     }
 
-    private sweepAABB(a: AABB, b: AABB, velocity: Vector3): number {
+    private sweepAABB(a: AABB, b: AABB, velocity: Vector3): CollisionData | null {
         const aOrigin = a.globalTransform.origin;
         const bOrigin = b.globalTransform.origin;
         let entryDist = new Vector3();
@@ -113,19 +113,28 @@ export class PhysicsEngine {
 
         const longestEntry = Math.max(...entryTime.toArray());
         const shortestExit = Math.min(...exitTime.toArray());
-        // alert("entrytimes: " + JSON.stringify(entryTime) + " " + JSON.stringify(exitTime));
-        // alert("longestEntry: " + longestEntry);
-        // alert("shortestExit: " + shortestExit);
-        // alert("times: " + (entryTime.x > 1) + " " + (entryTime.y > 1) + " " + (entryTime.z > 1));
-        // alert("eachaxis: " + (entryTime.x > exitTime.x) + " " + (entryTime.y > exitTime.y) + " " + (entryTime.z > exitTime.z));
-        // alert((longestEntry > shortestExit) + " " + (entryTime.x < 0 && entryTime.y < 0 && entryTime.z < 0) + " " + (entryTime.x > 1 && entryTime.y > 1 && entryTime.z > 1));
 
         if (longestEntry > shortestExit || (entryTime.x < 0 && entryTime.y < 0 && entryTime.z < 0) || (entryTime.x > 1 && entryTime.y > 1 && entryTime.z > 1)) {
-            return -1;
+            return null;
         }
 
-        // alert("passed checks");
+        let normal = new Vector3();
+        if (longestEntry == entryTime.x) {
+            normal.x = -Math.sign(velocity.x);
+        } else if (longestEntry == entryTime.y) {
+            normal.y = -Math.sign(velocity.y);
+        } else if (longestEntry == entryTime.z) {
+            normal.z = -Math.sign(velocity.z);
+        }
 
-        return longestEntry;
+        const distance = normal.abs().multiply(entryDist)
+
+        return {time: longestEntry, normal: normal, distance: distance};
     }
 }
+
+type CollisionData = {
+    time: number,
+    normal: Vector3,
+    distance: Vector3
+};

@@ -36,10 +36,11 @@ export class GameView extends View {
         floorModel.transform.basis = floorModel.transform.basis.scaled(new Vector3(20, 1, 20));
         floorModel.parent = floor;
 
-        const lodestone = new StaticBody(new AABB(Vector3.zero(), new Vector3(1, 1, 1)));
+        const lodestone = new StaticBody(new AABB(Vector3.zero(), new Vector3(9, 1, 1)));
         lodestone.transform.origin = new Vector3(0, 2, -10);
         const model1 = new Renderable();
         model1.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(landmarkMaterials));
+        model1.transform.basis = model1.transform.basis.scaled(new Vector3(9, 1, 1));
         model1.parent = lodestone;
 
         this._objects.push(new Player(), floor, lodestone);

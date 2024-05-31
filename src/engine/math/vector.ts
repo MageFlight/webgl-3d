@@ -26,12 +26,18 @@ export class Vector3 {
         );
     }
 
-    public add(right: Vector3): Vector3 {
-        return new Vector3(this.x + right.x, this.y + right.y, this.z + right.z);
+    public add(right: Vector3 | number): Vector3 {
+        if (right instanceof Vector3)
+            return new Vector3(this.x + right.x, this.y + right.y, this.z + right.z);
+        
+        return new Vector3(this.x + right, this.y + right, this.z + right);
     }
 
-    public subtract(right: Vector3): Vector3 {
-        return new Vector3(this.x - right.x, this.y - right.y, this.z - right.z);
+    public subtract(right: Vector3 | number): Vector3 {
+        if (right instanceof Vector3)
+            return new Vector3(this.x - right.x, this.y - right.y, this.z - right.z);
+        
+        return new Vector3(this.x - right, this.y - right, this.z - right);
     }
 
     public multiply(right: Vector3 | number): Vector3 {
@@ -80,6 +86,26 @@ export class Vector3 {
 
     public abs() {
         return new Vector3(Math.abs(this.x), Math.abs(this.y), Math.abs(this.z));
+    }
+
+    public normalized() {
+        let length = this.x * this.x + this.y * this.y + this.z * this.z;
+        if (length > 0) {
+            length = Math.sqrt(length);
+            const inverseLength = 1.0 / length;
+            return new Vector3(this.x * inverseLength, this.y * inverseLength, this.z * inverseLength);
+        } else {
+            return new Vector3(1, 0, 0);
+        }
+    }
+
+    public length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    }
+
+    public projectOnPlane(normal: Vector3) {
+        const dot = this.dot(normal);
+        return this.subtract(normal.multiply(dot));
     }
 }
 

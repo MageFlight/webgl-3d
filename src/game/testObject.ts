@@ -38,6 +38,9 @@ export class Player extends CharacterBody {
     private camera: Camera;
     private cameraAngle = Vector2.zero();
 
+    private readonly maxBounces = 5;
+    private readonly skinWidth = 0.015; // Helps fix rounding errors
+
     constructor() {
         super(new AABB(Vector3.zero(), new Vector3(1, 1, 1), "playerCollider"), "player");
         this.transform.origin.y = 2;
@@ -72,9 +75,27 @@ export class Player extends CharacterBody {
     }
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
-        const time = physics.rectangleCast(this.collider, this.velocity);
-        this.transform.origin = this.transform.origin.add(this.velocity.multiply(time));
-        // alert("Collision is " + time);
-        // alert("pos: " + JSON.stringify(this.transform.origin));
+        const slideVelocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity, 0);
+        this.transform.origin = this.transform.origin.add(slideVelocity);
+    }
+
+    private collideAndSlide(physics: PhysicsEngine, position: Vector3, velocity: Vector3, depth: number): Vector3 {
+        if (depth > this.maxBounces) {
+            return Vector3.zero();
+        }
+
+        const collider = new AABB(position, this.collider.extents.subtract(this.skinWidth));
+        const collision = physics.rectangleCast(collider, velocity.add(this.skinWidth));
+
+        if (!collision) return velocity;
+
+        const snapToSurface = this.velocity.normalized().multiply(collision.distance.subtract(this.skinWidth));
+        let leftover = this.velocity.subtract(snapToSurface);
+
+        const magnitude = leftover.length();
+        leftover = leftover.projectOnPlane(collision.normal).normalized();
+        leftover = leftover.multiply(magnitude);
+
+        return snapToSurface.add(this.collideAndSlide(physics, position.add(snapToSurface), leftover, depth + 1));
     }
 }
