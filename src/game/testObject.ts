@@ -8,29 +8,6 @@ import { PhysicsEngine } from "../engine/physics";
 import { KeyboardHandler, MouseHandeler } from "../engine/input";
 import { Matrix4, Basis } from "../engine/math/matrix";
 
-export class TestObject extends Renderable {
-    constructor() {
-        super();
-
-        const parsedMaterials = Renderer.parseMTL(materials);
-        this.bufferData = Renderer.parseOBJ(model, parsedMaterials);
-    }
-
-    public update(dt: number): void {
-        // const framerate = dt;
-
-        // const title = document.querySelector("title");
-        // if (!title) return;
-        // title.textContent = "FPS: " + Math.round(1000 / framerate);
-    }
-    public async load() {
-        const response = await fetch('resources/models/cube/cube.obj');
-        const text = await response.text();
-        return;
-    }
-
-}
-
 export class Player extends CharacterBody {
     private keyboard = KeyboardHandler.instance;
     private mouse = MouseHandeler.instance;
