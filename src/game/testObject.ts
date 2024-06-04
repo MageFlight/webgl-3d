@@ -21,9 +21,8 @@ export class Player extends CharacterBody {
     private readonly skinWidth = 0.015; // Helps fix rounding errors
 
     constructor() {
-        super(new AABB(Vector3.zero(), new Vector3(1, 1, 1), "playerCollider"), "player");
-        this.transform.origin.y = 2;
-        this.transform.origin.x = 0;
+        super(new AABB(Vector3.zero(), new Vector3(1, 2, 1), "playerCollider"), "player");
+        this.transform.origin.y = 3;
 
         const display = new Renderable("playerDisplay");
         const material = Renderer.parseMTL(materials);
