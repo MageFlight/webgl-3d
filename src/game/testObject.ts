@@ -6,7 +6,7 @@ import { Vector2, Vector3 } from "../engine/math/vector";
 import { AABB, CharacterBody } from "../engine/objects/physicsObject";
 import { PhysicsEngine } from "../engine/physics";
 import { KeyboardHandler, MouseHandeler } from "../engine/input";
-import { Matrix4, Basis } from "../engine/math/matrix";
+import { Matrix4, Basis, Transform } from "../engine/math/matrix";
 
 export class TestObject extends Renderable {
     constructor() {
@@ -38,12 +38,15 @@ export class Player extends CharacterBody {
     private camera: Camera;
     private cameraAngle = Vector2.zero();
 
+    private readonly speed = 0.5;
+
     private readonly maxBounces = 5;
     private readonly skinWidth = 0.015; // Helps fix rounding errors
 
     constructor() {
         super(new AABB(Vector3.zero(), new Vector3(1, 1, 1), "playerCollider"), "player");
         this.transform.origin.y = 2;
+        this.transform.origin.x = -10;
 
         const display = new Renderable("playerDisplay");
         const material = Renderer.parseMTL(materials);
@@ -51,31 +54,34 @@ export class Player extends CharacterBody {
         display.parent = this;
 
         this.camera = new Camera();
-        this.camera.transform.origin = new Vector3(0, 1, 0);
         this.camera.parent = this;
     }
 
     public update(dt: number): void {
         let direction = Vector3.zero();
-        if (this.keyboard.isKeyDown("KeyA")) direction.x -= 0.5;
-        if (this.keyboard.isKeyDown("KeyD")) direction.x += 0.5;
-        if (this.keyboard.isKeyDown("KeyW")) direction.z -= 0.5;
-        if (this.keyboard.isKeyDown("KeyS")) direction.z += 0.5;
+        if (this.keyboard.isKeyDown("KeyA")) direction.x -= 1;
+        if (this.keyboard.isKeyDown("KeyD")) direction.x += 1;
+        if (this.keyboard.isKeyDown("KeyW")) direction.z -= 1;
+        if (this.keyboard.isKeyDown("KeyS")) direction.z += 1;
+        let movement = direction.normalized().multiply(this.speed);
 
         let turnAmount = this.mouse.mouseDelta.multiply(Math.PI / 720);
         this.cameraAngle = this.cameraAngle.add(turnAmount);
 
-        this.velocity = Matrix4.rotation(new Vector3(0, 1, 0), -this.cameraAngle.x).transformVector(direction);
-        // this.velocity.y = -1;
+        this.velocity = Matrix4.rotation(new Vector3(0, 1, 0), -this.cameraAngle.x).transformVector(movement);
+        this.velocity.y += -0.5;
+        // this.velocity.x = 1;
+        // this.velocity.z = -1;
         // this.transform.origin = this.transform.origin.add(translationVector);
 
-        this.transform.basis = new Basis();
-        this.transform.basis = this.transform.basis.rotated(new Vector3(0, 1, 0), this.cameraAngle.x);
-        this.transform.basis = this.transform.basis.rotated(new Vector3(1, 0, 0), this.cameraAngle.y);
+        this.camera.transform.basis = new Basis();
+        this.camera.transform.basis = this.camera.transform.basis.rotated(new Vector3(1, 0, 0), this.cameraAngle.y);
+        this.camera.transform.basis = this.camera.transform.basis.rotated(new Vector3(0, 1, 0), this.cameraAngle.x);
     }
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
         const slideVelocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity, 0);
+        // alert("SlideVelocity: " + JSON.stringify(slideVelocity));
         this.transform.origin = this.transform.origin.add(slideVelocity);
     }
 
@@ -84,17 +90,29 @@ export class Player extends CharacterBody {
             return Vector3.zero();
         }
 
+        // alert("calculating new slide");
+
+        const dist = velocity.length() + this.skinWidth;
+
         const collider = new AABB(position, this.collider.extents.subtract(this.skinWidth));
-        const collision = physics.rectangleCast(collider, velocity.add(this.skinWidth));
+        const collision = physics.rectangleCast(collider, velocity.normalized().multiply(dist));
 
         if (!collision) return velocity;
 
-        const snapToSurface = this.velocity.normalized().multiply(collision.distance.subtract(this.skinWidth));
-        let leftover = this.velocity.subtract(snapToSurface);
+        // alert("collision dist " + JSON.stringify(collision.distance));
+        // alert("normalized vel: " + JSON.stringify(velocity.normalized()));
+        // alert("distance sub " + JSON.stringify((collision.distance.subtract(this.skinWidth))));
+        const snapToSurface = velocity.normalized().multiply(collision.distance.subtract(this.skinWidth));
+        let leftover = velocity.subtract(snapToSurface);
 
         const magnitude = leftover.length();
-        leftover = leftover.projectOnPlane(collision.normal).normalized();
+        // alert("original " + JSON.stringify(velocity) + " snap " + JSON.stringify(snapToSurface));
+        // alert("leftovers: " + JSON.stringify(leftover) + " " + JSON.stringify(leftover.normalized()));
+        leftover = leftover.normalized().projectOnPlane(collision.normal);
+        // alert("normal: " + JSON.stringify(collision.normal));
+        // alert("projection " + JSON.stringify(leftover));
         leftover = leftover.multiply(magnitude);
+        // alert("Scanning new with vel " + JSON.stringify(leftover));
 
         return snapToSurface.add(this.collideAndSlide(physics, position.add(snapToSurface), leftover, depth + 1));
     }

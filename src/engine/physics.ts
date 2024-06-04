@@ -88,6 +88,7 @@ export class PhysicsEngine {
 
         let entryTime = new Vector3();
         let exitTime = new Vector3();
+        // alert("velocity:" + JSON.stringify(velocity));
 
         if (velocity.x == 0) {
             entryTime.x = -Infinity;
@@ -114,7 +115,10 @@ export class PhysicsEngine {
         const longestEntry = Math.max(...entryTime.toArray());
         const shortestExit = Math.min(...exitTime.toArray());
 
-        if (longestEntry > shortestExit || (entryTime.x < 0 && entryTime.y < 0 && entryTime.z < 0) || (entryTime.x > 1 && entryTime.y > 1 && entryTime.z > 1)) {
+        // alert("longestEntry: " + longestEntry);
+        // alert("entryTimes: " + JSON.stringify(entryTime));
+
+        if (longestEntry > shortestExit || (entryTime.x < 0 && entryTime.y < 0 && entryTime.z < 0) || (entryTime.x > 1 && entryTime.y > 1 && entryTime.z > 1) || longestEntry > 1) {
             return null;
         }
 
@@ -127,7 +131,8 @@ export class PhysicsEngine {
             normal.z = -Math.sign(velocity.z);
         }
 
-        const distance = normal.abs().multiply(entryDist)
+        // alert("entryDist " + JSON.stringify(entryDist));
+        const distance = normal.multiply(entryDist).abs();
 
         return {time: longestEntry, normal: normal, distance: distance};
     }

@@ -588,7 +588,11 @@ export class Basis {
     }
 
     public rotated(axis: Vector3, angle: number): Basis {
-        return Basis.rotation(axis, angle).multiply(this);
+        return this.multiply(Basis.rotation(axis, angle));
+    }
+
+    public rotatedLocal(axis: Vector3, angle: number): Basis {
+        return (Basis.rotation(axis, angle)).multiply(this);
     }
 
     public clone(): Basis {

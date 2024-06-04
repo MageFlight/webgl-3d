@@ -95,7 +95,7 @@ export class Vector3 {
             const inverseLength = 1.0 / length;
             return new Vector3(this.x * inverseLength, this.y * inverseLength, this.z * inverseLength);
         } else {
-            return new Vector3(1, 0, 0);
+            return new Vector3(0, 0, 0);
         }
     }
 
