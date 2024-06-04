@@ -40,6 +40,7 @@ export class Player extends CharacterBody {
         if (this.keyboard.isKeyDown("KeyD")) direction.x += 1;
         if (this.keyboard.isKeyDown("KeyW")) direction.z -= 1;
         if (this.keyboard.isKeyDown("KeyS")) direction.z += 1;
+        if (this.keyboard.keyJustReleased("Space")) this.velocity.y = 1.2;
         let movement = direction.normalized().multiply(this.speed);
 
         let turnAmount = this.mouse.mouseDelta.multiply(Math.PI / 720);
@@ -48,7 +49,7 @@ export class Player extends CharacterBody {
         let globalMovement = Matrix4.rotation(new Vector3(0, 1, 0), -this.cameraAngle.x).transformVector(movement);
         this.velocity.x = globalMovement.x;
         this.velocity.z = globalMovement.z;
-        this.velocity.y += -0.08;
+        this.velocity.y += -0.15;
 
         this.camera.transform.basis = new Basis();
         this.camera.transform.basis = this.camera.transform.basis.rotated(new Vector3(1, 0, 0), this.cameraAngle.y);
