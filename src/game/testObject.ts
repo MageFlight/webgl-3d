@@ -1,12 +1,12 @@
 
-import { AttribInfo, Camera, Renderable, Renderer } from "../engine/renderer";
+import { Camera, Renderable, Renderer } from "../engine/renderer";
 import model from '../../assets/models/cube.obj?raw';
 import materials from '../../assets/models/player.mtl?raw';
 import { Vector2, Vector3 } from "../engine/math/vector";
 import { AABB, CharacterBody } from "../engine/objects/physicsObject";
 import { PhysicsEngine } from "../engine/physics";
 import { KeyboardHandler, MouseHandeler } from "../engine/input";
-import { Matrix4, Basis, Transform } from "../engine/math/matrix";
+import { Matrix4, Basis } from "../engine/math/matrix";
 
 export class TestObject extends Renderable {
     constructor() {
@@ -72,7 +72,6 @@ export class Player extends CharacterBody {
         this.velocity.x = globalMovement.x;
         this.velocity.z = globalMovement.z;
         this.velocity.y += -0.08;
-        // this.transform.origin = this.transform.origin.add(translationVector);
 
         this.camera.transform.basis = new Basis();
         this.camera.transform.basis = this.camera.transform.basis.rotated(new Vector3(1, 0, 0), this.cameraAngle.y);
@@ -81,7 +80,6 @@ export class Player extends CharacterBody {
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
         this.velocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity, 0);
-        // alert("SlideVelocity: " + JSON.stringify(slideVelocity));
         this.transform.origin = this.transform.origin.add(this.velocity);
     }
 
@@ -90,8 +88,6 @@ export class Player extends CharacterBody {
             return Vector3.zero();
         }
 
-        // alert("calculating new slide");
-
         const dist = velocity.length() + this.skinWidth;
 
         const collider = new AABB(position, this.collider.extents.subtract(this.skinWidth));
@@ -99,20 +95,12 @@ export class Player extends CharacterBody {
 
         if (!collision) return velocity;
 
-        // alert("collision dist " + JSON.stringify(collision.distance));
-        // alert("normalized vel: " + JSON.stringify(velocity.normalized()));
-        // alert("distance sub " + JSON.stringify((collision.distance.subtract(this.skinWidth))));
         const snapToSurface = velocity.normalized().multiply(collision.distance.subtract(this.skinWidth));
         let leftover = velocity.subtract(snapToSurface);
 
         const magnitude = leftover.length();
-        // alert("original " + JSON.stringify(velocity) + " snap " + JSON.stringify(snapToSurface));
-        // alert("leftovers: " + JSON.stringify(leftover) + " " + JSON.stringify(leftover.normalized()));
         leftover = leftover.normalized().projectOnPlane(collision.normal);
-        // alert("normal: " + JSON.stringify(collision.normal));
-        // alert("projection " + JSON.stringify(leftover));
         leftover = leftover.multiply(magnitude);
-        // alert("Scanning new with vel " + JSON.stringify(leftover));
 
         return snapToSurface.add(this.collideAndSlide(physics, position.add(snapToSurface), leftover, depth + 1));
     }

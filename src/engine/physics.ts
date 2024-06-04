@@ -16,20 +16,16 @@ export class PhysicsEngine {
             collider.extents.add(velocity.abs())
         );
         let options: PhysicsBody[] = [];
-        // alert(JSON.stringify(globalPos) + "broadbox: " + JSON.stringify(broadBox));
         const check = (obj: GameObject) => {
             if (!(obj instanceof PhysicsBody) || obj === collider.parent) return;
-            // alert("checking " + obj.name);
 
             if (PhysicsEngine.intersecting(broadBox, obj.collider)) {
-                // alert("found");
                 options.push(obj);
             }
 
             obj.children.forEach(check);
         }
         this.tree.forEach(check);
-        // alert("options " + options.length);
         return this.sweepObjects(collider, options, velocity);
     }
 
@@ -88,7 +84,6 @@ export class PhysicsEngine {
 
         let entryTime = new Vector3();
         let exitTime = new Vector3();
-        // alert("velocity:" + JSON.stringify(velocity));
 
         if (velocity.x == 0) {
             entryTime.x = -Infinity;
@@ -115,9 +110,6 @@ export class PhysicsEngine {
         const longestEntry = Math.max(...entryTime.toArray());
         const shortestExit = Math.min(...exitTime.toArray());
 
-        // alert("longestEntry: " + longestEntry);
-        // alert("entryTimes: " + JSON.stringify(entryTime));
-
         if (longestEntry > shortestExit || (entryTime.x < 0 && entryTime.y < 0 && entryTime.z < 0) || (entryTime.x > 1 && entryTime.y > 1 && entryTime.z > 1) || longestEntry > 1) {
             return null;
         }
@@ -131,7 +123,6 @@ export class PhysicsEngine {
             normal.z = -Math.sign(velocity.z);
         }
 
-        // alert("entryDist " + JSON.stringify(entryDist));
         const distance = normal.multiply(entryDist).abs();
 
         return {time: longestEntry, normal: normal, distance: distance};
