@@ -15,7 +15,7 @@ export class Player extends CharacterBody {
     private camera: Camera;
     private cameraAngle = Vector2.zero();
 
-    private readonly speed = 0.5;
+    private readonly speed = 15;
 
     private readonly maxBounces = 5;
     private readonly skinWidth = 0.015; // Helps fix rounding errors
@@ -39,7 +39,7 @@ export class Player extends CharacterBody {
         if (this.keyboard.isKeyDown("KeyD")) direction.x += 1;
         if (this.keyboard.isKeyDown("KeyW")) direction.z -= 1;
         if (this.keyboard.isKeyDown("KeyS")) direction.z += 1;
-        if (this.keyboard.keyJustReleased("Space")) this.velocity.y = 1.2;
+        if (this.keyboard.keyJustReleased("Space")) this.velocity.y = 17;
         let movement = direction.normalized().multiply(this.speed);
 
         let turnAmount = this.mouse.mouseDelta.multiply(Math.PI / 720);
@@ -48,7 +48,6 @@ export class Player extends CharacterBody {
         let globalMovement = Matrix4.rotation(new Vector3(0, 1, 0), -this.cameraAngle.x).transformVector(movement);
         this.velocity.x = globalMovement.x;
         this.velocity.z = globalMovement.z;
-        this.velocity.y += -0.15;
 
         this.camera.transform.basis = new Basis();
         this.camera.transform.basis = this.camera.transform.basis.rotated(new Vector3(1, 0, 0), this.cameraAngle.y);
@@ -56,8 +55,12 @@ export class Player extends CharacterBody {
     }
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
-        this.velocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity, 0);
+        this.velocity.y += -50 * dt;
+        document.title = "" + this.velocity.y;
+
+        this.velocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity.multiply(dt), 0);
         this.transform.origin = this.transform.origin.add(this.velocity);
+        this.velocity = this.velocity.multiply(1 / dt);
     }
 
     private collideAndSlide(physics: PhysicsEngine, position: Vector3, velocity: Vector3, depth: number): Vector3 {
