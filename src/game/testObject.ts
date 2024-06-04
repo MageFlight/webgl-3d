@@ -46,7 +46,7 @@ export class Player extends CharacterBody {
     constructor() {
         super(new AABB(Vector3.zero(), new Vector3(1, 1, 1), "playerCollider"), "player");
         this.transform.origin.y = 2;
-        this.transform.origin.x = -10;
+        this.transform.origin.x = 0;
 
         const display = new Renderable("playerDisplay");
         const material = Renderer.parseMTL(materials);
@@ -68,10 +68,10 @@ export class Player extends CharacterBody {
         let turnAmount = this.mouse.mouseDelta.multiply(Math.PI / 720);
         this.cameraAngle = this.cameraAngle.add(turnAmount);
 
-        this.velocity = Matrix4.rotation(new Vector3(0, 1, 0), -this.cameraAngle.x).transformVector(movement);
-        this.velocity.y += -0.5;
-        // this.velocity.x = 1;
-        // this.velocity.z = -1;
+        let globalMovement = Matrix4.rotation(new Vector3(0, 1, 0), -this.cameraAngle.x).transformVector(movement);
+        this.velocity.x = globalMovement.x;
+        this.velocity.z = globalMovement.z;
+        this.velocity.y += -0.08;
         // this.transform.origin = this.transform.origin.add(translationVector);
 
         this.camera.transform.basis = new Basis();
@@ -80,9 +80,9 @@ export class Player extends CharacterBody {
     }
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
-        const slideVelocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity, 0);
+        this.velocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity, 0);
         // alert("SlideVelocity: " + JSON.stringify(slideVelocity));
-        this.transform.origin = this.transform.origin.add(slideVelocity);
+        this.transform.origin = this.transform.origin.add(this.velocity);
     }
 
     private collideAndSlide(physics: PhysicsEngine, position: Vector3, velocity: Vector3, depth: number): Vector3 {
