@@ -41,6 +41,7 @@ export class Engine {
 
             if (this._previousTime != -1) {
                 dt = currentTime - this._previousTime;
+                dt /= 1000; // Convert to seconds
             }
             this._previousTime = currentTime;
 
@@ -52,7 +53,7 @@ export class Engine {
             this._keyboardHandler.update();
             this._mouseHandler.update();
 
-            if (!this._currentView || this._numPromises > 0) return;
+            if (!this._currentView || this._numPromises > 0 || dt <= 0) return;
 
             this._currentView.update(dt);
         } catch (e: any) {

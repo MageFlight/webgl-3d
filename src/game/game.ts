@@ -9,7 +9,7 @@ import { View } from "../engine/view";
 import { Player } from "./testObject";
 import model from '../../assets/models/cube.obj?raw';
 import floorMaterials from '../../assets/models/floor.mtl?raw';
-
+import landmarkMaterials from '../../assets/models/landmark.mtl?raw';
 
 export class GameView extends View {
     private _objects: GameObject[] = [];
@@ -26,7 +26,7 @@ export class GameView extends View {
 
         this._engine = engine;
 
-        const floor = new StaticBody(new AABB(Vector3.zero(), new Vector3(40, 1, 40)), "floor");
+        const floor = new StaticBody(new AABB(Vector3.zero(), new Vector3(20, 1, 20)), "floor");
         floor.transform.origin = new Vector3(0, 0, 0);
 
         const floorModel = new Renderable();
@@ -34,7 +34,15 @@ export class GameView extends View {
         floorModel.transform.basis = floorModel.transform.basis.scaled(floor.collider.extents);
         floorModel.parent = floor;
 
-        this._objects.push(new Player(), floor);
+        const lodestone = new StaticBody(new AABB(Vector3.zero(), new Vector3(9, 1, 1)), "landmark");
+        lodestone.transform.origin = new Vector3(0, 2, -10);
+
+        const lodestoneModel = new Renderable();
+        lodestoneModel.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(landmarkMaterials));
+        lodestoneModel.transform.basis = lodestoneModel.transform.basis.scaled(lodestone.collider.extents);
+        lodestoneModel.parent = lodestone;
+
+        this._objects.push(new Player(), floor, lodestone);
 
         this._renderer = new Renderer(canvas);
         this._physics = new PhysicsEngine(this._objects);
