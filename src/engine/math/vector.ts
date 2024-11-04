@@ -107,6 +107,10 @@ export class Vector3 {
         const dot = this.dot(normal);
         return this.subtract(normal.multiply(dot));
     }
+
+    public toFixed(fractionDigits?: number): string {
+        return `[${this.x.toFixed(fractionDigits)} ${this.y.toFixed(fractionDigits)} ${this.z.toFixed(fractionDigits)}]`;
+    }
 }
 
 export class Vector2 {

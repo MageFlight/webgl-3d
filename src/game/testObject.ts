@@ -56,7 +56,7 @@ export class Player extends CharacterBody {
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
         this.velocity.y += -50 * dt;
-        document.title = "" + JSON.stringify(this.transform.origin);
+        document.title = this.transform.origin.toFixed(2);
 
         this.velocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity.multiply(dt), 0);
         this.transform.origin = this.transform.origin.add(this.velocity);
