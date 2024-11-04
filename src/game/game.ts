@@ -29,10 +29,10 @@ export class GameView extends View {
         const floor = new StaticBody(new AABB(Vector3.zero(), new Vector3(20, 1, 20)), "floor");
         floor.transform.origin = new Vector3(0, 0, 0);
 
-        // const floorModel = new Renderable();
-        // floorModel.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(floorMaterials));
-        // floorModel.transform.basis = floorModel.transform.basis.scaled(floor.collider.extents);
-        // floorModel.parent = floor;
+        const floorModel = new Renderable();
+        floorModel.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(floorMaterials));
+        floorModel.transform.basis = floorModel.transform.basis.scaled(floor.collider.extents);
+        floorModel.parent = floor;
 
         const lodestone = new StaticBody(new AABB(Vector3.zero(), new Vector3(1, 1, 1)), "landmark");
         lodestone.transform.origin = new Vector3(0, 2, -10);
@@ -41,8 +41,6 @@ export class GameView extends View {
         lodestoneModel.bufferData = Renderer.parseOBJ(model, Renderer.parseMTL(landmarkMaterials));
         lodestoneModel.transform.basis = lodestoneModel.transform.basis.scaled(lodestone.collider.extents);
         lodestoneModel.parent = lodestone;
-
-        alert("Model bufferData " + lodestoneModel.bufferData.attributes.size);
 
         this._objects.push(new Player(), floor, lodestone);
 

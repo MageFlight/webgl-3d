@@ -118,8 +118,6 @@ export class Renderer {
             this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
             this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(attrib[1].data), this._gl.STATIC_DRAW);
 
-            alert("attrib " + attrib[0] + " location: " + location + " Type: " + data.elementType);
-            
             this._gl.enableVertexAttribArray(location);
             this._gl.vertexAttribPointer(location, attrib[1].numComponents, data.elementType, false, 0, 0);
         }
@@ -307,10 +305,6 @@ export class Renderer {
             indices: indices.flat(),
             elementType: WebGL2RenderingContext.FLOAT
         };
-
-        // alert("pos len " + result.attributes.get("inPosition")?.data.length + " indices len " + result.indices.length);
-        // alert("Parse result " + result.attributes.entries());
-        // alert(JSON.stringify(result.attributes.get("inPosition")) + " " + result.attributes.get("inPosition")?.data.length + " " + JSON.stringify(objVertecies));
 
         return result;
     } 
