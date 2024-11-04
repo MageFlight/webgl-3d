@@ -92,8 +92,7 @@ export class Renderer {
 
             this._gl.bindVertexArray(this.getVAO(object.bufferData));
 
-            // TODO: Fix checking length
-            this._gl.drawArrays(this._gl.TRIANGLES, 0, object.bufferData.get("inPosition")!.data.length / 3);
+            this._gl.drawElements(this._gl.TRIANGLES, object.bufferData.numElements * 3, this._gl.UNSIGNED_SHORT, 0);
         }
 
         for (let i = 0; i < object.children.length; i++) {
@@ -112,16 +111,22 @@ export class Renderer {
         if (vao === null) throw new Error("Could not create VAO");
         this._gl.bindVertexArray(vao);
 
-        for (const attrib of data) {
+        for (const attrib of data.attributes) {
             const location = this._gl.getAttribLocation(this._program, attrib[0]);
             
             const buffer = this._gl.createBuffer();
             this._gl.bindBuffer(this._gl.ARRAY_BUFFER, buffer);
             this._gl.bufferData(this._gl.ARRAY_BUFFER, new Float32Array(attrib[1].data), this._gl.STATIC_DRAW);
+
+            alert("attrib " + attrib[0] + " location: " + location + " Type: " + data.elementType);
             
             this._gl.enableVertexAttribArray(location);
-            this._gl.vertexAttribPointer(location, attrib[1].numComponents, this._gl.FLOAT, false, 0, 0);
+            this._gl.vertexAttribPointer(location, attrib[1].numComponents, data.elementType, false, 0, 0);
         }
+
+        const indexBuffer = this._gl.createBuffer();
+        this._gl.bindBuffer(this._gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        this._gl.bufferData(this._gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(data.indices), this._gl.STATIC_DRAW);
 
         this._gl.bindVertexArray(null);
 
@@ -247,7 +252,7 @@ export class Renderer {
 
     public static parseOBJ(file: string, materials: Map<string, Material>): BufferData {
         let objVertecies: number[][] = [];
-        let positions: number[][] = [];
+        let indices: number[][] = [];
         let colors: number[][] = [];
 
         let currentMaterial = "default";
@@ -255,19 +260,19 @@ export class Renderer {
         const keywordHandlers = new Map([
             ["v", (parts: string[]) => {objVertecies.push(parts.map(parseFloat))}],
             ["f", (parts: string[]) => {
-                const numTriangles = parts.length - 2;
-
-                const indicies = parts.map(vertex => parseInt(vertex.split("/")[0]) - 1);
+                let fileIndices = parts.map(vertex => parseInt(vertex.split("/")[0]) - 1);
                 const material = materials.get(currentMaterial);
                 const color = material ? material.color.toArray() : [1, 0, 0];
-
-                for (let tri = 0; tri < numTriangles; ++tri) {
-                    positions.push((objVertecies[indicies[0]]));
-                    positions.push((objVertecies[indicies[tri + 1]]));
-                    positions.push((objVertecies[indicies[tri + 2]]));
-
-                    colors.push(color, color, color);
+                
+                for (let tri = 0; tri < parts.length - 2; tri++) {
+                    indices.push([
+                        fileIndices[0],
+                        fileIndices[tri + 1],
+                        fileIndices[tri + 2]
+                    ]);
                 }
+
+                colors.push(color, color, color);
             }],
             ["usemtl", (parts: string[]) => currentMaterial = parts[0]]
         ]);
@@ -293,17 +298,31 @@ export class Renderer {
             handler(args);
         }
 
-        const result: BufferData = new Map([
-            ["inPosition", {numComponents: 3, data: positions.flat()}],
-            ["inColor", {numComponents: 3, data: colors.flat()}]
-        ]);
+        const result: BufferData = {
+            attributes: new Map([
+                ["inPosition", {numComponents: 3, data: objVertecies.flat()}],
+                ["inColor", {numComponents: 3, data: colors.flat()}]
+            ]),
+            numElements: indices.length,
+            indices: indices.flat(),
+            elementType: WebGL2RenderingContext.FLOAT
+        };
+
+        // alert("pos len " + result.attributes.get("inPosition")?.data.length + " indices len " + result.indices.length);
+        // alert("Parse result " + result.attributes.entries());
+        // alert(JSON.stringify(result.attributes.get("inPosition")) + " " + result.attributes.get("inPosition")?.data.length + " " + JSON.stringify(objVertecies));
 
         return result;
     } 
 }
 
 export class Renderable extends Node3 {
-    public bufferData: BufferData = new Map();
+    public bufferData: BufferData = {
+        attributes: new Map(),
+        numElements: 0,
+        indices: [],
+        elementType: -1
+    };
     public uniformData: Map<string, UniformInfo> = new Map();
 
 
@@ -332,7 +351,12 @@ export class Camera extends Node3 {
     }
 }
 
-export type BufferData = Map<string, AttribInfo>;
+export type BufferData = {
+    attributes: Map<string, AttribInfo>,
+    numElements: number,
+    indices: number[],
+    elementType: number,
+};
 export type AttribInfo = { numComponents: number, data: number[] };
 export type UniformInfo = { dimension: number, isMatrix: boolean, data: number[] };
 export type Material = { color: Vector3 };

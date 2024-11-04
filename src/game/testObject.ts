@@ -21,7 +21,7 @@ export class Player extends CharacterBody {
     private readonly skinWidth = 0.015; // Helps fix rounding errors
 
     constructor() {
-        super(new AABB(Vector3.zero(), new Vector3(1, 2, 1), "playerCollider"), "player");
+        super(new AABB(new Vector3(0, 0, -2), new Vector3(1, 2, 1), "playerCollider"), "player");
         this.transform.origin.y = 3;
 
         const display = new Renderable("playerDisplay");
@@ -55,8 +55,9 @@ export class Player extends CharacterBody {
     }
 
     public physicsUpdate(physics: PhysicsEngine, dt: number): void {
-        this.velocity.y += -50 * dt;
-        document.title = "" + this.velocity.y;
+        // this.velocity.y += -50 * dt;
+        this.velocity.y = 0;
+        document.title = "" + JSON.stringify(this.transform.origin);
 
         this.velocity = this.collideAndSlide(physics, this.collider.globalTransform.origin, this.velocity.multiply(dt), 0);
         this.transform.origin = this.transform.origin.add(this.velocity);
